@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cibles DPE – Prospection Uniso</title>
+<style>
+:root{--vert:#2f7d4f;--vert-f:#1f5a37;--vert-c:#e8f3ec;--rouge:#c62828;--gris:#5f6b66;--bord:#d6dfda;--fond:#f6f8f7}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fond);color:#1d2622;font-size:16px;line-height:1.4}
+header{background:var(--vert);color:#fff;padding:14px 14px 0}
+header h1{margin:0;font-size:1.2rem}
+header p{margin:2px 0 10px;font-size:.85rem;opacity:.9}
+.tabs{display:flex;gap:4px}
+.tabs button{flex:1;background:transparent;color:#fff;border:none;padding:10px 4px;font-weight:700;font-size:.92rem;border-bottom:3px solid transparent;opacity:.75}
+.tabs button.on{border-color:#fff;opacity:1}
+main{max-width:680px;margin:0 auto;padding:12px 12px 60px}
+.card{background:#fff;border:1px solid var(--bord);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:1.05rem}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px;border:1.5px solid var(--bord);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--vert)}
+button{font-family:inherit;font-size:.95rem;font-weight:700;border:none;border-radius:10px;padding:12px 14px;cursor:pointer}
+.b-prim{background:var(--vert);color:#fff}
+.b-sec{background:var(--vert-c);color:var(--vert-f)}
+.b-fb{background:#1877f2;color:#fff}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.hide{display:none!important}
+.sugg{border:1px solid var(--bord);border-radius:10px;margin-top:4px;overflow:hidden;background:#fff}
+.sugg div{padding:10px 12px;border-bottom:1px solid var(--bord);cursor:pointer}
+.sugg div:last-child{border:none}
+.sugg small{color:var(--gris)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--fond);border-radius:10px;padding:10px;text-align:center}
+.kpi b{display:block;font-size:1.45rem}
+.kpi span{font-size:.75rem;color:var(--gris)}
+.kpi.red b{color:var(--rouge)}
+.bars{margin-top:12px}
+.bar{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:.85rem}
+.bar .l{width:22px;height:22px;border-radius:4px;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.bar .t{flex:1;background:var(--fond);border-radius:4px;height:16px;overflow:hidden}
+.bar .t i{display:block;height:100%}
+.bar .n{width:78px;text-align:right;color:var(--gris);flex:none}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;color:var(--gris);font-weight:600;font-size:.78rem;padding:6px 4px;border-bottom:1px solid var(--bord)}
+td{padding:8px 4px;border-bottom:1px solid #eef2ef}
+td.r,th.r{text-align:right}
+tr.click{cursor:pointer}
+tr.click:active{background:var(--vert-c)}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:.8rem}
+.warn{background:#fff8e1;border-radius:10px;padding:10px 12px;font-size:.84rem;margin-top:10px}
+.err{background:#fdecea;color:var(--rouge);border-radius:10px;padding:10px 12px;font-size:.88rem;margin-top:10px;word-break:break-word}
+.muted{color:var(--gris);font-size:.82rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{background:#fff;border:1.5px solid var(--bord);color:#1d2622;font-weight:500;padding:8px 12px;border-radius:20px;font-size:.88rem}
+.chips button.on{background:var(--vert);border-color:var(--vert);color:#fff}
+textarea{min-height:190px;line-height:1.45}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.actions button{flex:1 1 45%}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--bord);border-top-color:var(--vert);border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d2622;color:#fff;padding:10px 16px;border-radius:20px;font-size:.9rem;opacity:0;transition:.3s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 Cibles DPE : prospection Uniso</h1>
+  <p>Maisons diagnostiquées F ou G par commune (données ouvertes ADEME)</p>
+  <div class="tabs">
+    <button class="on" data-tab="commune">Commune</button>
+    <button data-tab="classement">Classement</button>
+    <button data-tab="reglages">Réglages</button>
+  </div>
+</header>
+
+<main>
+<!-- ============ ONGLET COMMUNE ============ -->
+<section id="t-commune">
+  <div class="card">
+    <label for="q" style="margin-top:0">Commune</label>
+    <input id="q" placeholder="Tapez un nom : Broons, Plancoët, Montauban…" autocomplete="off">
+    <div class="sugg hide" id="sugg"></div>
+  </div>
+
+  <div id="res" class="hide">
+    <div class="card">
+      <h2 id="rTitre"></h2>
+      <div class="kpis">
+        <div class="kpi"><b id="kTot">–</b><span>maisons avec DPE</span></div>
+        <div class="kpi red"><b id="kFG">–</b><span>classées F ou G</span></div>
+        <div class="kpi"><b id="kEFG">–</b><span>classées E, F ou G</span></div>
+      </div>
+      <div class="bars" id="bars"></div>
+      <div class="muted" id="rAnc" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2>📣 Post Facebook prêt à publier</h2>
+      <div class="chips" id="tpls"></div>
+      <label for="post">Texte (modifiable)</label>
+      <textarea id="post"></textarea>
+      <div class="actions">
+        <button class="b-prim" onclick="copier()">📋 Copier le texte</button>
+        <button class="b-fb" onclick="partager()">📤 Partager</button>
+        <button class="b-sec" onclick="groupes()">🔎 Groupes de la commune</button>
+        <button class="b-sec" onclick="copierLien()">🔗 Copier le lien seul</button>
+        <button class="b-prim" style="flex-basis:100%" onclick="image()">🖼 Créer l'image du post (avec logo)</button>
+      </div>
+      <canvas id="cv" width="1080" height="1080" class="hide" style="width:100%;border-radius:10px;margin-top:10px"></canvas>
+      <div class="actions hide" id="imgAct"><button class="b-fb" onclick="partagerImage()">📤 Partager l'image</button><button class="b-sec" onclick="telecharger()">⬇️ Enregistrer l'image</button></div>
+      <div class="muted" style="margin-top:8px">Astuce : collez le texte dans le groupe et ajoutez une photo d'un de vos chantiers. Une photo avant/après attire beaucoup plus de réponses.</div>
+    </div>
+
+    <div class="card">
+      <h2>🚪 Rues à cibler <span class="muted">(pour toi uniquement)</span></h2>
+      <div class="muted">Pour la distribution de flyers et le porte-à-porte. <b>Ne publie pas cette liste</b> : nommer une rue « mal isolée » vexerait ses habitants.</div>
+      <div id="rues" style="margin-top:8px"></div>
+    </div>
+  </div>
+  <div id="cErr"></div>
+</section>
+
+<!-- ============ ONGLET CLASSEMENT ============ -->
+<section id="t-classement" class="hide">
+  <div class="card">
+    <h2>Les communes où il y a le plus de maisons F ou G</h2>
+    <div class="row">
+      <select id="dep"><option value="22">Côtes-d'Armor (22)</option><option value="35">Ille-et-Vilaine (35)</option></select>
+      <select id="tri"><option value="pct">Trier par %</option><option value="nb">Trier par nombre</option></select>
+    </div>
+    <label for="mini">Minimum de maisons diagnostiquées</label>
+    <select id="mini"><option>20</option><option selected>40</option><option>80</option><option>150</option></select>
+    <button class="b-prim" style="width:100%;margin-top:10px" onclick="classement()">Afficher le classement</button>
+    <div class="muted" style="margin-top:8px">Touchez une commune pour voir son détail et générer le post.</div>
+  </div>
+  <div class="card hide" id="clsCard"><div id="cls"></div></div>
+  <div id="clsErr"></div>
+</section>
+
+<!-- ============ ONGLET RÉGLAGES ============ -->
+<section id="t-reglages" class="hide">
+  <div class="card">
+    <h2>Lien de ta page « Estimation gratuite »</h2>
+    <label for="lien">Adresse de la page (GitHub Pages)</label>
+    <input id="lien" placeholder="https://tonpseudo.github.io/estimation/">
+    <div class="muted" style="margin-top:6px">La commune et la source (<code>?commune=…&amp;src=fb-…</code>) sont ajoutées automatiquement. Chaque demande reçue t'indique ainsi de quel post elle vient.</div>
+    <label>Logo Ouest Eco Logis (pour les images)</label>
+    <input type="file" id="logoF" accept="image/*">
+    <img id="logoPrev" class="hide" style="max-height:60px;margin-top:8px">
+    <label for="sig">Signature des posts</label>
+    <textarea id="sig" style="min-height:80px"></textarea>
+    <button class="b-prim" style="width:100%;margin-top:10px" onclick="saveSettings();toast('Réglages enregistrés')">Enregistrer</button>
+  </div>
+  <div class="card">
+    <h2>À savoir sur les chiffres</h2>
+    <div class="muted">Les chiffres viennent de la base officielle des DPE de l'ADEME (DPE réalisés depuis juillet 2021, nouvelle méthode). Ils portent sur les <b>maisons qui ont eu un DPE</b>, en général lors d'une vente ou d'une location, pas sur toutes les maisons de la commune. Le texte des posts le précise pour rester honnête.</div>
+    <div class="muted" id="diag" style="margin-top:8px"></div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant";
+const GEO = "https://geo.api.gouv.fr";
+const COUL = {A:"#009c6d",B:"#52b153",C:"#a5cc74",D:"#f4e70f",E:"#f0b50f",F:"#eb8235",G:"#d7221f"};
+const $ = id => document.getElementById(id);
+let F = null;          // noms des champs ADEME détectés
+let cur = null;        // commune affichée {nom, code, cp, stats}
+let tpl = 0;
+
+/* ---------- Réglages ---------- */
+const DEF_SIG = "Stéphane Renaud, Ouest Eco Logis\n📞 06 45 62 42 85";
+function loadSettings(){
+  try{ const s = JSON.parse(localStorage.getItem("dpe_set") || "{}");
+    $("lien").value = s.lien || ""; $("sig").value = s.sig || DEF_SIG; }catch(e){ $("sig").value = DEF_SIG; }
+}
+function saveSettings(){ try{ localStorage.setItem("dpe_set", JSON.stringify({lien:$("lien").value.trim(), sig:$("sig").value})); }catch(e){} if(cur) majPost(); }
+
+/* ---------- Onglets ---------- */
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => tab(b.dataset.tab));
+function tab(t){
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  ["commune","classement","reglages"].forEach(x => $("t-"+x).classList.toggle("hide", x !== t));
+  window.scrollTo(0,0);
+}
+
+/* ---------- Détection des champs ADEME ---------- */
+async function champs(){
+  if (F) return F;
+  const r = await fetch(API);
+  if (!r.ok) throw new Error("ADEME indisponible (" + r.status + ")");
+  const j = await r.json();
+  const keys = (j.schema || []).map(f => f.key);
+  const pick = (...c) => c.find(k => keys.includes(k)) || null;
+  F = {
+    insee: pick("code_insee_ban","code_insee_commune_actualise","code_insee_commune","code_insee"),
+    label: pick("etiquette_dpe","classe_consommation_energie"),
+    type:  pick("type_batiment","tr002_type_batiment_description"),
+    rue:   pick("nom_rue_ban","nom_rue","adresse_ban"),
+    per:   pick("periode_construction","annee_construction")
+  };
+  $("diag").textContent = "Champs ADEME utilisés : " + Object.entries(F).map(([k,v]) => k + "=" + (v||"absent")).join(", ");
+  if (!F.insee || !F.label) throw new Error("Structure de la base ADEME modifiée (champs introuvables).");
+  return F;
+}
+const maison = () => F.type ? ` AND ${F.type}:"maison"` : "";
+
+/* values_agg : renvoie [{value, n}] */
+async function agg(field, qs, size){
+  const u = `${API}/values_agg?field=${encodeURIComponent(field)}&qs=${encodeURIComponent(qs)}&agg_size=${size||20}&size=0`;
+  const r = await fetch(u);
+  if (!r.ok) throw new Error("Requête ADEME refusée (" + r.status + ")" + (r.status===429 ? " : trop de requêtes, réessayez dans 1 minute." : ""));
+  const j = await r.json();
+  return { total: j.total || 0, list: (j.aggs || []).map(a => ({ value: a.value, n: a.total ?? a.count ?? 0 })) };
+}
+
+/* ---------- Recherche de commune ---------- */
+let tmr;
+$("q").addEventListener("input", () => { clearTimeout(tmr); tmr = setTimeout(cherche, 250); });
+async function cherche(){
+  const q = $("q").value.trim(); const box = $("sugg");
+  if (q.length < 2){ box.classList.add("hide"); return; }
+  try{
+    const r = await fetch(`${GEO}/communes?nom=${encodeURIComponent(q)}&fields=nom,code,codesPostaux,codeDepartement&boost=population&limit=8`);
+    const l = await r.json();
+    l.sort((a,b) => (["22","35"].includes(b.codeDepartement)) - (["22","35"].includes(a.codeDepartement)));
+    box.innerHTML = l.map(c => `<div data-c='${JSON.stringify({nom:c.nom,code:c.code,cp:(c.codesPostaux||[])[0]||""}).replace(/'/g,"&#39;")}'>${c.nom} <small>${(c.codesPostaux||[])[0]||""} · ${c.codeDepartement}</small></div>`).join("") || "<div><small>Aucune commune trouvée</small></div>";
+    box.classList.remove("hide");
+    box.querySelectorAll("div[data-c]").forEach(d => d.onclick = () => { box.classList.add("hide"); const c = JSON.parse(d.dataset.c); $("q").value = c.nom; analyse(c); });
+  }catch(e){}
+}
+
+/* ---------- Analyse d'une commune ---------- */
+async function analyse(c){
+  tab("commune");
+  $("cErr").innerHTML = `<div class="card"><span class="spin"></span>Analyse des DPE de ${c.nom}…</div>`;
+  $("res").classList.add("hide");
+  try{
+    await champs();
+    const base = `${F.insee}:"${c.code}"${maison()}`;
+    const lab = await agg(F.label, base, 10);
+    const cnt = {}; lab.list.forEach(x => cnt[String(x.value).toUpperCase()] = x.n);
+    const tot = "ABCDEFG".split("").reduce((s,k) => s + (cnt[k]||0), 0);
+    if (!tot){ $("cErr").innerHTML = `<div class="warn">Aucune maison avec DPE trouvée pour ${c.nom}. La commune est peut-être trop petite, ou la base n'est pas renseignée.</div>`; return; }
+    const fg = (cnt.F||0) + (cnt.G||0), efg = fg + (cnt.E||0);
+
+    // part F/G parmi les maisons d'avant 1975
+    let anc = null;
+    if (F.per === "periode_construction"){
+      try{
+        const per = await agg(F.per, base, 20);
+        const vieux = per.list.filter(p => {
+          const s = String(p.value).toLowerCase();
+          if (s.startsWith("avant")) { const y = +(s.match(/\d{4}/)||[0])[0]; return y && y <= 1975; }
+          const y = +(s.match(/\d{4}/)||[9999])[0]; return y < 1975;
+        }).map(p => p.value);
+        if (vieux.length){
+          const qv = `${base} AND ${F.per}:(${vieux.map(v => `"${v}"`).join(" OR ")})`;
+          const v1 = await agg(F.label, qv, 10);
+          const vc = {}; v1.list.forEach(x => vc[String(x.value).toUpperCase()] = x.n);
+          const vt = "ABCDEFG".split("").reduce((s,k) => s + (vc[k]||0), 0);
+          if (vt >= 10) anc = { pct: Math.round(100*((vc.F||0)+(vc.G||0))/vt), n: vt };
+        }
+      }catch(e){}
+    }
+
+    cur = { ...c, tot, cnt, fg, efg, pFG: Math.round(100*fg/tot), pEFG: Math.round(100*efg/tot), anc };
+    $("rTitre").textContent = `${c.nom} (${c.cp})`;
+    $("kTot").textContent = tot.toLocaleString("fr-FR");
+    $("kFG").textContent = cur.pFG + " %";
+    $("kEFG").textContent = cur.pEFG + " %";
+    const max = Math.max(...Object.values(cnt));
+    $("bars").innerHTML = "ABCDEFG".split("").map(k => `<div class="bar"><span class="l" style="background:${COUL[k]}">${k}</span><span class="t"><i style="width:${100*(cnt[k]||0)/max}%;background:${COUL[k]}"></i></span><span class="n">${cnt[k]||0} · ${Math.round(100*(cnt[k]||0)/tot)} %</span></div>`).join("");
+    $("rAnc").textContent = anc ? `Maisons construites avant 1975 : ${anc.pct} % classées F ou G (sur ${anc.n} DPE).` : "";
+    if (tot < 30) $("rAnc").textContent += " ⚠️ Peu de DPE dans cette commune : chiffres à prendre avec prudence.";
+    renderTpls(); majPost();
+    $("res").classList.remove("hide"); $("cErr").innerHTML = "";
+    rues(base);
+  }catch(e){
+    $("cErr").innerHTML = `<div class="err">❌ ${e.message}<br><small>Vérifiez la connexion internet. Si le problème continue, la base ADEME est peut-être en maintenance.</small></div>`;
+  }
+}
+
+/* ---------- Rues ---------- */
+async function rues(base){
+  const box = $("rues");
+  if (!F.rue){ box.innerHTML = `<div class="muted">Le nom des rues n'est pas disponible dans la base.</div>`; return; }
+  box.innerHTML = `<span class="spin"></span>Recherche des rues…`;
+  try{
+    const [mauv, toutes] = await Promise.all([
+      agg(F.rue, `${base} AND ${F.label}:("F" OR "G")`, 40),
+      agg(F.rue, base, 300)
+    ]);
+    const tot = {}; toutes.list.forEach(x => tot[x.value] = x.n);
+    let l = mauv.list.filter(x => x.value && x.n >= 2).map(x => ({ rue: x.value, fg: x.n, tot: tot[x.value] || x.n }));
+    l.forEach(x => x.p = Math.round(100*x.fg/x.tot));
+    l.sort((a,b) => b.fg - a.fg || b.p - a.p);
+    l = l.slice(0, 15);
+    if (!l.length){ box.innerHTML = `<div class="muted">Pas assez de DPE par rue pour faire ressortir des rues.</div>`; return; }
+    box.innerHTML = `<table><tr><th>Rue</th><th class="r">F/G</th><th class="r">DPE</th><th class="r">%</th></tr>` +
+      l.map(x => `<tr class="click" onclick="carte('${encodeURIComponent(x.rue)}')"><td>${esc(x.rue)}</td><td class="r"><b>${x.fg}</b></td><td class="r">${x.tot}</td><td class="r"><span class="pill" style="background:${x.p>=40?'#fdecea':'#fff3e0'};color:${x.p>=40?'#c62828':'#b45f06'}">${x.p} %</span></td></tr>`).join("") +
+      `</table><div class="muted" style="margin-top:6px">Touchez une rue pour l'ouvrir dans Google Maps.</div>`;
+  }catch(e){ box.innerHTML = `<div class="muted">Rues indisponibles : ${esc(e.message)}</div>`; }
+}
+function carte(rue){ window.open(`https://www.google.com/maps/search/?api=1&query=${rue}%20${encodeURIComponent(cur.cp+" "+cur.nom)}`, "_blank"); }
+const esc = s => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+/* ---------- Posts Facebook ---------- */
+const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function lienCommune(){
+  let b = $("lien").value.trim();
+  if (!b) return "[ton lien de page estimation]";
+  const u = b + (b.includes("?") ? "&" : "?") + `commune=${encodeURIComponent(cur.nom)}&cp=${cur.cp}&src=fb-${slug(cur.nom)}`;
+  return u;
+}
+const KIT = "🔨 Bricoleur ? Recevez le KIT Uniso et posez-le vous-même.\n👷 Ou confiez la pose clé en main à nos équipes.";
+const TPLS = [
+  { nom: "Chiffre choc", f: c => {
+    const chiffre = c.anc && c.anc.pct > c.pFG
+      ? `🏠 À ${c.nom}, ${c.anc.pct} % des maisons construites avant 1975 et diagnostiquées depuis 2021 sont classées F ou G.`
+      : `🏠 À ${c.nom}, ${c.pFG} % des maisons diagnostiquées depuis 2021 sont classées F ou G.`;
+    return `${chiffre}\n\nChauffage qui coûte cher, murs froids, DPE qui bloque une vente ou une location ? L'isolation des murs par l'extérieur fait gagner plusieurs classes, sans travaux à l'intérieur.\n\n${KIT}\n\n✅ Estimation gratuite en 2 minutes, sans déplacement : 2 ou 3 photos et un croquis avec vos mesures.\n👉 ${lienCommune()}`; } },
+  { nom: "Kit bricoleur", f: c => `🔨 Bricoleurs de ${c.nom} : isolez vos murs par l'extérieur vous-même !\n\nAvec le KIT Uniso, vous recevez tout le nécessaire pour poser l'isolation de votre maison. Vous préférez ne pas y toucher ? Nos équipes s'en chargent.\n\nÀ ${c.nom}, ${c.pFG} % des maisons diagnostiquées depuis 2021 sont classées F ou G.\n\n✅ Estimation gratuite en 2 minutes (kit ou pose) : 2 ou 3 photos et un croquis avec vos mesures.\n👉 ${lienCommune()}` },
+  { nom: "Voisin", f: c => `Bonjour à tous 👋\n\nJe travaille régulièrement sur ${c.nom} et alentours pour l'isolation des maisons par l'extérieur (Uniso).\n\nD'après les DPE publics, ${c.pFG} % des maisons diagnostiquées ici sont classées F ou G.\n\n${KIT}\n\nJe vous fais une estimation gratuite sans me déplacer : vous m'envoyez 2 ou 3 photos et un croquis avec les mesures, je vous réponds avec un devis estimatif.\n👉 ${lienCommune()}\n\nAvec plaisir pour répondre aux questions en commentaire !` },
+  { nom: "Vente / location", f: c => `🔑 Propriétaires à ${c.nom} : votre DPE est en F ou G ?\n\nC'est le cas de ${c.pFG} % des maisons diagnostiquées dans la commune depuis 2021. Les logements G ne peuvent déjà plus être mis en location, et les F suivront en 2028.\n\nL'isolation des murs par l'extérieur est l'un des travaux qui font le plus gagner de classes.\n\n${KIT}\n\n✅ Estimation gratuite en 2 minutes :\n👉 ${lienCommune()}` }
+];
+function renderTpls(){
+  $("tpls").innerHTML = TPLS.map((t,i) => `<button class="${i===tpl?'on':''}" onclick="tpl=${i};renderTpls();majPost()">${t.nom}</button>`).join("");
+}
+function majPost(){ if (cur) $("post").value = TPLS[tpl].f(cur) + "\n\n" + ($("sig").value || DEF_SIG); }
+
+async function copier(){ await copy($("post").value); toast("Texte copié ✅ Collez-le dans le groupe"); }
+async function copierLien(){ await copy(lienCommune()); toast("Lien copié"); }
+async function copy(t){
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); }
+}
+async function partager(){
+  const t = $("post").value;
+  if (navigator.share){ try{ await copy(t); await navigator.share({ text: t }); }catch(e){} }
+  else { await copy(t); toast("Texte copié : ouvrez Facebook et collez-le"); }
+}
+function groupes(){ window.open(`https://www.facebook.com/search/groups/?q=${encodeURIComponent(cur.nom)}`, "_blank"); }
+function toast(m){ const t = $("toast"); t.textContent = m; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 2200); }
+
+/* ---------- Classement par département ---------- */
+async function classement(){
+  const dep = $("dep").value, mini = +$("mini").value, tri = $("tri").value;
+  $("clsErr").innerHTML = `<div class="card"><span class="spin"></span>Calcul en cours (cela peut prendre quelques secondes)…</div>`;
+  $("clsCard").classList.add("hide");
+  try{
+    await champs();
+    const qd = `${F.insee}:${dep}*${maison()}`;
+    const [fgA, totA, comm] = await Promise.all([
+      aggSafe(F.insee, `${qd} AND ${F.label}:("F" OR "G")`),
+      aggSafe(F.insee, qd),
+      fetch(`${GEO}/departements/${dep}/communes?fields=nom,code,codesPostaux`).then(r => r.json())
+    ]);
+    const noms = {}; comm.forEach(c => noms[c.code] = { nom: c.nom, cp: (c.codesPostaux||[])[0] || "" });
+    const fg = {}; fgA.list.forEach(x => fg[x.value] = x.n);
+    let l = totA.list.filter(x => x.n >= mini && noms[x.value]).map(x => ({ code: x.value, ...noms[x.value], tot: x.n, fg: fg[x.value] || 0 }));
+    l.forEach(x => x.p = Math.round(100*x.fg/x.tot));
+    l.sort((a,b) => tri === "nb" ? b.fg - a.fg : b.p - a.p || b.fg - a.fg);
+    l = l.slice(0, 50);
+    $("cls").innerHTML = `<table><tr><th>#</th><th>Commune</th><th class="r">F/G</th><th class="r">DPE</th><th class="r">%</th></tr>` +
+      l.map((x,i) => `<tr class="click" onclick='analyse(${JSON.stringify({nom:x.nom,code:x.code,cp:x.cp})});$("q").value=${JSON.stringify(x.nom)}'><td>${i+1}</td><td>${esc(x.nom)}</td><td class="r"><b>${x.fg}</b></td><td class="r">${x.tot}</td><td class="r"><span class="pill" style="background:#fdecea;color:#c62828">${x.p} %</span></td></tr>`).join("") + `</table>`;
+    $("clsCard").classList.remove("hide"); $("clsErr").innerHTML = "";
+  }catch(e){
+    $("clsErr").innerHTML = `<div class="err">❌ ${esc(e.message)}</div>`;
+  }
+}
+async function aggSafe(field, qs){
+  for (const s of [500, 200, 100]){ try{ return await agg(field, qs, s); }catch(e){ if (s === 100) throw e; } }
+}
+
+
+/* ---------- Image du post ---------- */
+let LOGO = null;
+try{ const d = localStorage.getItem("dpe_logo"); if (d){ LOGO = d; $("logoPrev").src = d; $("logoPrev").classList.remove("hide"); } }catch(e){}
+$("logoF").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => { const r = Math.min(1, 600/img.width), c = document.createElement("canvas");
+    c.width = img.width*r; c.height = img.height*r; c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    LOGO = c.toDataURL("image/png"); try{ localStorage.setItem("dpe_logo", LOGO); }catch(_){}
+    $("logoPrev").src = LOGO; $("logoPrev").classList.remove("hide"); toast("Logo enregistré"); };
+  img.src = u;
+});
+function wrap(x, t, cx, y, maxW, lh){
+  const w = t.split(" "); let l = "", lines = [];
+  w.forEach(m => { const test = l ? l + " " + m : m; if (x.measureText(test).width > maxW && l){ lines.push(l); l = m; } else l = test; });
+  lines.push(l); lines.forEach((li,i) => x.fillText(li, cx, y + i*lh)); return y + lines.length*lh;
+}
+async function image(){
+  if (!cur) return;
+  const cv = $("cv"), x = cv.getContext("2d"), W = 1080;
+  x.fillStyle = "#2f7d4f"; x.fillRect(0,0,W,W);
+  x.fillStyle = "#fff"; x.fillRect(0,0,W,190);
+  if (LOGO){ await new Promise(r => { const i = new Image(); i.onload = () => { const k = Math.min(700/i.width, 140/i.height), w = i.width*k, h = i.height*k; x.drawImage(i,(W-w)/2,(190-h)/2,w,h); r(); }; i.onerror = r; i.src = LOGO; }); }
+  else { x.fillStyle = "#1f5a37"; x.font = "800 70px system-ui,sans-serif"; x.textAlign = "center"; x.fillText("Ouest Eco Logis", W/2, 120); }
+  x.textAlign = "center"; x.fillStyle = "#fff";
+  const pct = cur.anc && cur.anc.pct > cur.pFG ? cur.anc.pct : cur.pFG;
+  const sous = cur.anc && cur.anc.pct > cur.pFG ? `des maisons d'avant 1975 diagnostiquées à ${cur.nom} sont classées F ou G` : `des maisons diagnostiquées à ${cur.nom} sont classées F ou G`;
+  x.font = "900 230px system-ui,sans-serif"; x.fillText(pct + " %", W/2, 430);
+  x.font = "600 50px system-ui,sans-serif"; let y = wrap(x, sous, W/2, 510, 920, 62);
+  x.font = "400 30px system-ui,sans-serif"; x.globalAlpha = .8; x.fillText("(DPE réalisés depuis 2021, source ADEME)", W/2, y + 10); x.globalAlpha = 1;
+  // bandeau kit / pose
+  x.fillStyle = "#fff"; x.beginPath(); x.roundRect(60, 700, 960, 190, 30); x.fill();
+  x.fillStyle = "#1d2622"; x.font = "800 52px system-ui,sans-serif";
+  x.fillText("🔨 KIT à poser soi-même", W/2, 775);
+  x.fillStyle = "#2f7d4f"; x.fillText("👷 ou POSE clé en main", W/2, 850);
+  x.fillStyle = "#fff"; x.font = "800 50px system-ui,sans-serif"; x.fillText("Estimation gratuite en 2 minutes", W/2, 960);
+  x.fillStyle = "#ffeb3b"; x.font = "800 56px system-ui,sans-serif"; x.fillText("📞 06 45 62 42 85", W/2, 1035);
+  cv.classList.remove("hide"); $("imgAct").classList.remove("hide");
+  cv.scrollIntoView({behavior:"smooth", block:"center"});
+}
+function blobImg(){ return new Promise(r => $("cv").toBlob(r, "image/jpeg", .9)); }
+async function partagerImage(){
+  const b = await blobImg(), f = new File([b], `uniso-${slug(cur.nom)}.jpg`, {type:"image/jpeg"});
+  await copy($("post").value);
+  if (navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f], text:$("post").value}); toast("Texte aussi copié : collez-le si besoin"); }catch(e){} }
+  else telecharger();
+}
+async function telecharger(){
+  const b = await blobImg(), a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = `uniso-${slug(cur.nom)}.jpg`; a.click();
+  toast("Image enregistrée");
+}
+loadSettings();
+</script>
+</body>
+</html>
