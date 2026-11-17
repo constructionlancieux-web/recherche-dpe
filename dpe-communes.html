@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cibles DPE – Prospection Uniso</title>
+<style>
+:root{--vert:#2f7d4f;--vert-f:#1f5a37;--vert-c:#e8f3ec;--rouge:#c62828;--gris:#5f6b66;--bord:#d6dfda;--fond:#f6f8f7}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fond);color:#1d2622;font-size:16px;line-height:1.4}
+header{background:var(--vert);color:#fff;padding:14px 14px 0}
+header h1{margin:0;font-size:1.2rem}
+header p{margin:2px 0 10px;font-size:.85rem;opacity:.9}
+.tabs{display:flex;gap:4px}
+.tabs button{flex:1;background:transparent;color:#fff;border:none;padding:10px 4px;font-weight:700;font-size:.92rem;border-bottom:3px solid transparent;opacity:.75}
+.tabs button.on{border-color:#fff;opacity:1}
+main{max-width:680px;margin:0 auto;padding:12px 12px 60px}
+.card{background:#fff;border:1px solid var(--bord);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:1.05rem}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px;border:1.5px solid var(--bord);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--vert)}
+button{font-family:inherit;font-size:.95rem;font-weight:700;border:none;border-radius:10px;padding:12px 14px;cursor:pointer}
+.b-prim{background:var(--vert);color:#fff}
+.b-sec{background:var(--vert-c);color:var(--vert-f)}
+.b-fb{background:#1877f2;color:#fff}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.hide{display:none!important}
+.sugg{border:1px solid var(--bord);border-radius:10px;margin-top:4px;overflow:hidden;background:#fff}
+.sugg div{padding:10px 12px;border-bottom:1px solid var(--bord);cursor:pointer}
+.sugg div:last-child{border:none}
+.sugg small{color:var(--gris)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--fond);border-radius:10px;padding:10px;text-align:center}
+.kpi b{display:block;font-size:1.45rem}
+.kpi span{font-size:.75rem;color:var(--gris)}
+.kpi.red b{color:var(--rouge)}
+.bars{margin-top:12px}
+.bar{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:.85rem}
+.bar .l{width:22px;height:22px;border-radius:4px;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.bar .t{flex:1;background:var(--fond);border-radius:4px;height:16px;overflow:hidden}
+.bar .t i{display:block;height:100%}
+.bar .n{width:78px;text-align:right;color:var(--gris);flex:none}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;color:var(--gris);font-weight:600;font-size:.78rem;padding:6px 4px;border-bottom:1px solid var(--bord)}
+td{padding:8px 4px;border-bottom:1px solid #eef2ef}
+td.r,th.r{text-align:right}
+tr.click{cursor:pointer}
+tr.click:active{background:var(--vert-c)}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:.8rem}
+.warn{background:#fff8e1;border-radius:10px;padding:10px 12px;font-size:.84rem;margin-top:10px}
+.err{background:#fdecea;color:var(--rouge);border-radius:10px;padding:10px 12px;font-size:.88rem;margin-top:10px;word-break:break-word}
+.muted{color:var(--gris);font-size:.82rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{background:#fff;border:1.5px solid var(--bord);color:#1d2622;font-weight:500;padding:8px 12px;border-radius:20px;font-size:.88rem}
+.chips button.on{background:var(--vert);border-color:var(--vert);color:#fff}
+textarea{min-height:190px;line-height:1.45}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.actions button{flex:1 1 45%}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--bord);border-top-color:var(--vert);border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d2622;color:#fff;padding:10px 16px;border-radius:20px;font-size:.9rem;opacity:0;transition:.3s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 Cibles DPE : prospection Uniso</h1>
+  <p>Maisons diagnostiquées F ou G par commune (données ouvertes ADEME)</p>
+  <div class="tabs">
+    <button class="on" data-tab="commune">Commune</button>
+    <button data-tab="classement">Classement</button>
+    <button data-tab="chantier">🚧 Chantier</button>
+    <button data-tab="reglages">Réglages</button>
+  </div>
+</header>
+
+<main>
+<!-- ============ ONGLET COMMUNE ============ -->
+<section id="t-commune">
+  <div class="card">
+    <label for="q" style="margin-top:0">Commune</label>
+    <input id="q" placeholder="Tapez un nom : Broons, Plancoët, Montauban…" autocomplete="off">
+    <div class="sugg hide" id="sugg"></div>
+  </div>
+
+  <div id="res" class="hide">
+    <div class="card">
+      <h2 id="rTitre"></h2>
+      <div class="kpis">
+        <div class="kpi"><b id="kTot">–</b><span>maisons avec DPE</span></div>
+        <div class="kpi red"><b id="kFG">–</b><span>classées F ou G</span></div>
+        <div class="kpi"><b id="kEFG">–</b><span>classées de D à G</span></div>
+      </div>
+      <div class="bars" id="bars"></div>
+      <div class="muted" id="rAnc" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2>📣 Post Facebook prêt à publier</h2>
+      <div class="chips" id="tpls"></div>
+      <label for="post">Texte (modifiable)</label>
+      <textarea id="post"></textarea>
+      <div class="actions">
+        <button class="b-prim" onclick="copier()">📋 Copier le texte</button>
+        <button class="b-fb" onclick="partager()">📤 Partager</button>
+        <button class="b-sec" onclick="groupes()">🔎 Groupes de la commune</button>
+        <button class="b-sec" onclick="copierLien()">🔗 Copier le lien seul</button>
+        <button class="b-prim" style="flex-basis:100%" onclick="image()">🖼 Créer l'image du post (avec logo)</button>
+      </div>
+      <canvas id="cv" width="1080" height="1080" class="hide" style="width:100%;border-radius:10px;margin-top:10px"></canvas>
+      <div class="actions hide" id="imgAct"><button class="b-fb" onclick="partagerImage()">📤 Partager l'image</button><button class="b-sec" onclick="telecharger()">⬇️ Enregistrer l'image</button></div>
+      <div class="muted" style="margin-top:8px">Astuce : collez le texte dans le groupe et ajoutez une photo d'un de vos chantiers. Une photo avant/après attire beaucoup plus de réponses.</div>
+    </div>
+
+    <div class="card" id="pubCard">
+      <h2>📢 Publier dans un groupe</h2>
+      <select id="grpSel"></select>
+      <div class="muted" id="grpInfo" style="margin-top:6px"></div>
+      <button class="b-fb" style="width:100%;margin-top:10px" onclick="publier()">🚀 Publier dans ce groupe</button>
+      <div class="muted" style="margin-top:6px">L'appli enregistre l'image dans ta galerie, copie le texte et ouvre le groupe. Dans Facebook : touche « Exprimez-vous », colle le texte, ajoute la dernière photo, puis publie.</div>
+      <details style="margin-top:12px">
+        <summary style="font-weight:700;color:#1f5a37;cursor:pointer">➕ Ajouter un groupe</summary>
+        <label for="gNom">Nom du groupe</label>
+        <input id="gNom" placeholder="Ex. Tu es de Broons si…">
+        <label for="gUrl">Lien du groupe</label>
+        <input id="gUrl" placeholder="https://www.facebook.com/groups/…" inputmode="url">
+        <div class="muted" style="margin-top:4px">Dans Facebook : ouvre le groupe, touche « Partager », puis « Copier le lien ».</div>
+        <label for="gCom">Commune(s) liée(s)</label>
+        <input id="gCom" placeholder="Ex. Broons, Plénée-Jugon">
+        <button class="b-prim" style="width:100%;margin-top:10px" onclick="ajoutGroupe()">Enregistrer le groupe</button>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>🚪 Rues à cibler <span class="muted">(pour toi uniquement)</span></h2>
+      <div class="muted">Pour la distribution de flyers et le porte-à-porte. <b>Ne publie pas cette liste</b> : nommer une rue « mal isolée » vexerait ses habitants.</div>
+      <div id="rues" style="margin-top:8px"></div>
+    </div>
+  </div>
+  <div id="cErr"></div>
+</section>
+
+<!-- ============ ONGLET CLASSEMENT ============ -->
+<section id="t-classement" class="hide">
+  <div class="card">
+    <h2>Les communes où il y a le plus de maisons F ou G</h2>
+    <div class="row">
+      <select id="dep"><option value="22">Côtes-d'Armor (22)</option><option value="35">Ille-et-Vilaine (35)</option></select>
+      <select id="tri"><option value="pct">Trier par %</option><option value="nb">Trier par nombre</option></select>
+    </div>
+    <label for="mini">Minimum de maisons diagnostiquées</label>
+    <select id="mini"><option>20</option><option selected>40</option><option>80</option><option>150</option></select>
+    <button class="b-prim" style="width:100%;margin-top:10px" onclick="classement()">Afficher le classement</button>
+    <div class="muted" style="margin-top:8px">Touchez une commune pour voir son détail et générer le post.</div>
+  </div>
+  <div class="card hide" id="clsCard"><div id="cls"></div></div>
+  <div id="clsErr"></div>
+</section>
+
+<!-- ============ ONGLET CHANTIER ============ -->
+<section id="t-chantier" class="hide">
+  <div class="card">
+    <h2>🚧 Post « Chantier en cours »</h2>
+    <label for="chCom" style="margin-top:0">Commune du chantier</label>
+    <input id="chCom" placeholder="Ex. Broons" oninput="majChantier()">
+    <div class="muted" style="margin-top:8px">📷 La photo de l'image se change dans <b>Réglages</b>.</div>
+    <label>Type de chantier</label>
+    <div class="chips" id="chType">
+      <button class="on" data-v="pose" onclick="chSet(this)">👷 Posé par nos équipes</button>
+      <button data-v="kit" onclick="chSet(this)">🔨 Posé en kit par le propriétaire</button>
+    </div>
+    <label for="chAspect">Aspect et coloris <span class="muted">(facultatif)</span></label>
+    <input id="chAspect" placeholder="Ex. clin vertical gris clair" oninput="majChantier()">
+    <label for="chFin">Visible jusqu'au <span class="muted">(facultatif)</span></label>
+    <input id="chFin" placeholder="Ex. vendredi 28 novembre" oninput="majChantier()">
+    <button class="b-prim" style="width:100%;margin-top:12px" onclick="imageChantier()">🖼 Créer l'image « Chantier en cours »</button>
+    <canvas id="cv2" width="1080" height="1080" class="hide" style="width:100%;border-radius:10px;margin-top:10px"></canvas>
+  </div>
+  <div class="card">
+    <h2>📣 Texte du post</h2>
+    <textarea id="post2"></textarea>
+    <div class="actions">
+      <button class="b-prim" onclick="copy($('post2').value).then(()=>toast('Texte copié ✅'))">📋 Copier le texte</button>
+      <button class="b-sec" onclick="telechargerCh()">⬇️ Enregistrer l'image</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>📢 Publier dans un groupe</h2>
+    <select id="grpSel2"></select>
+    <button class="b-fb" style="width:100%;margin-top:10px" onclick="publierChantier()">🚀 Publier dans ce groupe</button>
+    <div class="muted" style="margin-top:6px">Pour ajouter un groupe, passez par l'onglet Commune.</div>
+  </div>
+</section>
+
+<!-- ============ ONGLET RÉGLAGES ============ -->
+<section id="t-reglages" class="hide">
+  <div class="card">
+    <h2>Lien de ta page « Estimation gratuite »</h2>
+    <label for="lien">Adresse de la page (GitHub Pages)</label>
+    <input id="lien" placeholder="https://tonpseudo.github.io/estimation/">
+    <div class="muted" style="margin-top:6px">La commune et la source (<code>?commune=…&amp;src=fb-…</code>) sont ajoutées automatiquement. Chaque demande reçue t'indique ainsi de quel post elle vient.</div>
+    <label>Logo Ouest Eco Logis (pour les images)</label>
+    <input type="file" id="logoF" accept="image/*">
+    <img id="logoPrev" class="hide" style="max-height:60px;margin-top:8px">
+    <label>Photo des posts « Chantier en cours »</label>
+    <img id="chPrev" style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:block;margin-bottom:6px">
+    <input type="file" id="chPhotoSet" accept="image/*">
+    <button class="b-sec" style="margin-top:6px" onclick="chReset()">↩️ Remettre la photo d'origine</button>
+    <label for="sig">Signature des posts</label>
+    <textarea id="sig" style="min-height:80px"></textarea>
+    <button class="b-prim" style="width:100%;margin-top:10px" onclick="saveSettings();toast('Réglages enregistrés')">Enregistrer</button>
+  </div>
+  <div class="card">
+    <h2>Mes groupes Facebook</h2>
+    <div id="grpList"></div>
+  </div>
+  <div class="card">
+    <h2>Historique des publications</h2>
+    <div id="histList"></div>
+  </div>
+  <div class="card">
+    <h2>À savoir sur les chiffres</h2>
+    <div class="muted">Les chiffres viennent de la base officielle des DPE de l'ADEME (DPE réalisés depuis juillet 2021, nouvelle méthode). Ils portent sur les <b>maisons qui ont eu un DPE</b>, en général lors d'une vente ou d'une location, pas sur toutes les maisons de la commune. Le texte des posts le précise pour rester honnête.</div>
+    <div class="muted" id="diag" style="margin-top:8px"></div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant";
+const GEO = "https://geo.api.gouv.fr";
+const COUL = {A:"#009c6d",B:"#52b153",C:"#a5cc74",D:"#f4e70f",E:"#f0b50f",F:"#eb8235",G:"#d7221f"};
+const $ = id => document.getElementById(id);
+let F = null;          // noms des champs ADEME détectés
+let cur = null;        // commune affichée {nom, code, cp, stats}
+let tpl = 0;
+
+/* ---------- Réglages ---------- */
+const DEF_SIG = "Stéphane Renaud, Ouest Eco Logis\n📞 06 45 62 42 85";
+function loadSettings(){
+  try{ const s = JSON.parse(localStorage.getItem("dpe_set") || "{}");
+    $("lien").value = s.lien || ""; $("sig").value = s.sig || DEF_SIG; }catch(e){ $("sig").value = DEF_SIG; }
+}
+function saveSettings(){ try{ localStorage.setItem("dpe_set", JSON.stringify({lien:$("lien").value.trim(), sig:$("sig").value})); }catch(e){} if(cur) majPost(); }
+
+/* ---------- Onglets ---------- */
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => tab(b.dataset.tab));
+function tab(t){
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  ["commune","classement","chantier","reglages"].forEach(x => $("t-"+x).classList.toggle("hide", x !== t));
+  window.scrollTo(0,0);
+}
+
+/* ---------- Détection des champs ADEME ---------- */
+async function champs(){
+  if (F) return F;
+  const r = await fetch(API);
+  if (!r.ok) throw new Error("ADEME indisponible (" + r.status + ")");
+  const j = await r.json();
+  const keys = (j.schema || []).map(f => f.key);
+  const pick = (...c) => c.find(k => keys.includes(k)) || null;
+  F = {
+    insee: pick("code_insee_ban","code_insee_commune_actualise","code_insee_commune","code_insee"),
+    label: pick("etiquette_dpe","classe_consommation_energie"),
+    type:  pick("type_batiment","tr002_type_batiment_description"),
+    rue:   pick("nom_rue_ban","nom_rue","adresse_ban"),
+    per:   pick("periode_construction","annee_construction")
+  };
+  $("diag").textContent = "Champs ADEME utilisés : " + Object.entries(F).map(([k,v]) => k + "=" + (v||"absent")).join(", ");
+  if (!F.insee || !F.label) throw new Error("Structure de la base ADEME modifiée (champs introuvables).");
+  return F;
+}
+const maison = () => F.type ? ` AND ${F.type}:"maison"` : "";
+
+/* values_agg : renvoie [{value, n}] */
+async function agg(field, qs, size){
+  const u = `${API}/values_agg?field=${encodeURIComponent(field)}&qs=${encodeURIComponent(qs)}&agg_size=${size||20}&size=0`;
+  const r = await fetch(u);
+  if (!r.ok) throw new Error("Requête ADEME refusée (" + r.status + ")" + (r.status===429 ? " : trop de requêtes, réessayez dans 1 minute." : ""));
+  const j = await r.json();
+  return { total: j.total || 0, list: (j.aggs || []).map(a => ({ value: a.value, n: a.total ?? a.count ?? 0 })) };
+}
+
+/* ---------- Recherche de commune ---------- */
+let tmr;
+$("q").addEventListener("input", () => { clearTimeout(tmr); tmr = setTimeout(cherche, 250); });
+async function cherche(){
+  const q = $("q").value.trim(); const box = $("sugg");
+  if (q.length < 2){ box.classList.add("hide"); return; }
+  try{
+    const r = await fetch(`${GEO}/communes?nom=${encodeURIComponent(q)}&fields=nom,code,codesPostaux,codeDepartement&boost=population&limit=8`);
+    const l = await r.json();
+    l.sort((a,b) => (["22","35"].includes(b.codeDepartement)) - (["22","35"].includes(a.codeDepartement)));
+    box.innerHTML = l.map(c => `<div data-c='${JSON.stringify({nom:c.nom,code:c.code,cp:(c.codesPostaux||[])[0]||""}).replace(/'/g,"&#39;")}'>${c.nom} <small>${(c.codesPostaux||[])[0]||""} · ${c.codeDepartement}</small></div>`).join("") || "<div><small>Aucune commune trouvée</small></div>";
+    box.classList.remove("hide");
+    box.querySelectorAll("div[data-c]").forEach(d => d.onclick = () => { box.classList.add("hide"); const c = JSON.parse(d.dataset.c); $("q").value = c.nom; analyse(c); });
+  }catch(e){}
+}
+
+/* ---------- Analyse d'une commune ---------- */
+async function analyse(c){
+  tab("commune");
+  $("cErr").innerHTML = `<div class="card"><span class="spin"></span>Analyse des DPE de ${c.nom}…</div>`;
+  $("res").classList.add("hide");
+  try{
+    await champs();
+    const base = `${F.insee}:"${c.code}"${maison()}`;
+    const lab = await agg(F.label, base, 10);
+    const cnt = {}; lab.list.forEach(x => cnt[String(x.value).toUpperCase()] = x.n);
+    const tot = "ABCDEFG".split("").reduce((s,k) => s + (cnt[k]||0), 0);
+    if (!tot){ $("cErr").innerHTML = `<div class="warn">Aucune maison avec DPE trouvée pour ${c.nom}. La commune est peut-être trop petite, ou la base n'est pas renseignée.</div>`; return; }
+    const fg = (cnt.F||0) + (cnt.G||0), efg = fg + (cnt.E||0);
+
+    // part F/G parmi les maisons d'avant 1975
+    let anc = null;
+    if (F.per === "periode_construction"){
+      try{
+        const per = await agg(F.per, base, 20);
+        const vieux = per.list.filter(p => {
+          const s = String(p.value).toLowerCase();
+          if (s.startsWith("avant")) { const y = +(s.match(/\d{4}/)||[0])[0]; return y && y <= 1975; }
+          const y = +(s.match(/\d{4}/)||[9999])[0]; return y < 1975;
+        }).map(p => p.value);
+        if (vieux.length){
+          const qv = `${base} AND ${F.per}:(${vieux.map(v => `"${v}"`).join(" OR ")})`;
+          const v1 = await agg(F.label, qv, 10);
+          const vc = {}; v1.list.forEach(x => vc[String(x.value).toUpperCase()] = x.n);
+          const vt = "ABCDEFG".split("").reduce((s,k) => s + (vc[k]||0), 0);
+          if (vt >= 10) anc = { pct: Math.round(100*((vc.F||0)+(vc.G||0))/vt), n: vt };
+        }
+      }catch(e){}
+    }
+
+    cur = { ...c, tot, cnt, fg, efg, pFG: Math.round(100*fg/tot), pEFG: Math.round(100*efg/tot), pDG: Math.round(100*(efg+(cnt.D||0))/tot), anc };
+    $("rTitre").textContent = `${c.nom} (${c.cp})`;
+    $("kTot").textContent = tot.toLocaleString("fr-FR");
+    $("kFG").textContent = cur.pFG + " %";
+    $("kEFG").textContent = cur.pDG + " %";
+    const max = Math.max(...Object.values(cnt));
+    $("bars").innerHTML = "ABCDEFG".split("").map(k => `<div class="bar"><span class="l" style="background:${COUL[k]}">${k}</span><span class="t"><i style="width:${100*(cnt[k]||0)/max}%;background:${COUL[k]}"></i></span><span class="n">${cnt[k]||0} · ${Math.round(100*(cnt[k]||0)/tot)} %</span></div>`).join("");
+    $("rAnc").textContent = anc ? `Maisons construites avant 1975 : ${anc.pct} % classées F ou G (sur ${anc.n} DPE).` : "";
+    if (tot < 30) $("rAnc").textContent += " ⚠️ Peu de DPE dans cette commune : chiffres à prendre avec prudence.";
+    renderTpls(); majPost(); majGroupes();
+    $("res").classList.remove("hide"); $("cErr").innerHTML = "";
+    rues(base);
+  }catch(e){
+    $("cErr").innerHTML = `<div class="err">❌ ${e.message}<br><small>Vérifiez la connexion internet. Si le problème continue, la base ADEME est peut-être en maintenance.</small></div>`;
+  }
+}
+
+/* ---------- Rues ---------- */
+async function rues(base){
+  const box = $("rues");
+  if (!F.rue){ box.innerHTML = `<div class="muted">Le nom des rues n'est pas disponible dans la base.</div>`; return; }
+  box.innerHTML = `<span class="spin"></span>Recherche des rues…`;
+  try{
+    const [mauv, toutes] = await Promise.all([
+      agg(F.rue, `${base} AND ${F.label}:("F" OR "G")`, 40),
+      agg(F.rue, base, 300)
+    ]);
+    const tot = {}; toutes.list.forEach(x => tot[x.value] = x.n);
+    let l = mauv.list.filter(x => x.value && x.n >= 2).map(x => ({ rue: x.value, fg: x.n, tot: tot[x.value] || x.n }));
+    l.forEach(x => x.p = Math.round(100*x.fg/x.tot));
+    l.sort((a,b) => b.fg - a.fg || b.p - a.p);
+    l = l.slice(0, 15);
+    if (!l.length){ box.innerHTML = `<div class="muted">Pas assez de DPE par rue pour faire ressortir des rues.</div>`; return; }
+    box.innerHTML = `<table><tr><th>Rue</th><th class="r">F/G</th><th class="r">DPE</th><th class="r">%</th></tr>` +
+      l.map(x => `<tr class="click" onclick="carte('${encodeURIComponent(x.rue)}')"><td>${esc(x.rue)}</td><td class="r"><b>${x.fg}</b></td><td class="r">${x.tot}</td><td class="r"><span class="pill" style="background:${x.p>=40?'#fdecea':'#fff3e0'};color:${x.p>=40?'#c62828':'#b45f06'}">${x.p} %</span></td></tr>`).join("") +
+      `</table><div class="muted" style="margin-top:6px">Touchez une rue pour l'ouvrir dans Google Maps.</div>`;
+  }catch(e){ box.innerHTML = `<div class="muted">Rues indisponibles : ${esc(e.message)}</div>`; }
+}
+function carte(rue){ window.open(`https://www.google.com/maps/search/?api=1&query=${rue}%20${encodeURIComponent(cur.cp+" "+cur.nom)}`, "_blank"); }
+const esc = s => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+/* ---------- Posts Facebook ---------- */
+const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function lienCommune(){
+  let b = $("lien").value.trim().split("?")[0];
+  if (!b) return "[ton lien de page estimation]";
+  return b + "?" + slug(cur.nom);
+}
+/* texte en gras Unicode (Facebook n'a pas de gras) */
+function gras(t){
+  return t.normalize("NFD").replace(/[A-Za-z0-9]/g, ch => {
+    const c = ch.charCodeAt(0);
+    if (c >= 65 && c <= 90) return String.fromCodePoint(0x1D5D4 + c - 65);
+    if (c >= 97 && c <= 122) return String.fromCodePoint(0x1D5EE + c - 97);
+    return String.fromCodePoint(0x1D7EC + c - 48);
+  });
+}
+const tag = n => "#" + n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^A-Za-z0-9]+/).filter(Boolean).map(m => m.charAt(0).toUpperCase() + m.slice(1)).join("");
+const ENTETE = c => `📍 ${gras("PROPRIÉTAIRES DE MAISON À " + c.nom.toUpperCase())}\n🏠 ${gras("Isolation de vos murs PAR L'EXTÉRIEUR")}`;
+const LIEN = () => `👉 ${gras("Votre simulation gratuite")} (2 min) :\n${lienCommune()}`;
+const KIT = "🔨 Bricoleur ? Recevez le KIT Uniso et posez-le vous-même.\n👷 Ou confiez la pose clé en main à nos équipes.";
+const TPLS = [
+  { nom: "Chiffre choc", f: c => `${ENTETE(c)}\n\n⚠️ ${gras(c.pDG + " %")} des maisons de ${c.nom} diagnostiquées depuis 2021 sont classées entre D et G, dont ${c.pFG} % en F ou G (passoires thermiques).\n\nMurs froids, chauffage qui coûte cher, DPE qui bloque une vente ou une location ? En isolant les murs par l'extérieur, vous gagnez des classes DPE sans travaux à l'intérieur, et votre façade est rénovée en même temps.\n\n${KIT}\n\n${LIEN()}\nVous m'envoyez 2 ou 3 photos et un croquis avec vos mesures, je vous réponds avec un devis estimatif. Sans déplacement, sans engagement.\n\n${tag(c.nom)} #IsolationExterieure #ITE #DPE` },
+  { nom: "Kit bricoleur", f: c => `${ENTETE(c)}\n\n🔨 ${gras("Bricoleur ? Posez-la vous-même !")}\nAvec le KIT Uniso, vous recevez tout le nécessaire pour isoler les murs de votre maison par l'extérieur. Vous préférez ne pas y toucher ? Nos équipes s'en chargent, clé en main.\n\n⚠️ À ${c.nom}, ${gras(c.pDG + " %")} des maisons diagnostiquées depuis 2021 sont classées entre D et G.\n\n${LIEN()}\nPrécisez simplement « kit » ou « pose » : 2 ou 3 photos et un croquis avec vos mesures suffisent.\n\n${tag(c.nom)} #IsolationExterieure #Bricolage #DPE` },
+  { nom: "Voisin", f: c => `${ENTETE(c)}\n\nBonjour à tous 👋 Je travaille régulièrement à ${c.nom} et alentours pour l'isolation des maisons par l'extérieur (Uniso).\n\n⚠️ D'après les DPE publics, ${gras(c.pDG + " %")} des maisons diagnostiquées ici depuis 2021 sont classées entre D et G.\n\n${KIT}\n\n${LIEN()}\nVous m'envoyez quelques photos et un croquis avec vos mesures, je vous réponds avec un devis estimatif, sans me déplacer.\n\nAvec plaisir pour répondre à vos questions en commentaire !\n\n${tag(c.nom)} #IsolationExterieure` },
+  { nom: "Vente / location", f: c => `${ENTETE(c)}\n\n🔑 ${gras("Votre DPE bloque une vente ou une location ?")}\n⚠️ À ${c.nom}, ${gras(c.pDG + " %")} des maisons diagnostiquées depuis 2021 sont classées entre D et G, dont ${c.pFG} % en F ou G. Les logements G ne peuvent déjà plus être mis en location, les F suivront en 2028.\n\nL'isolation des murs par l'extérieur est l'un des travaux qui font le plus gagner de classes DPE.\n\n${KIT}\n\n${LIEN()}\n\n${tag(c.nom)} #IsolationExterieure #DPE` }
+];
+function renderTpls(){
+  $("tpls").innerHTML = TPLS.map((t,i) => `<button class="${i===tpl?'on':''}" onclick="tpl=${i};renderTpls();majPost()">${t.nom}</button>`).join("");
+}
+function majPost(){ if (cur) $("post").value = TPLS[tpl].f(cur) + "\n\n" + ($("sig").value || DEF_SIG); }
+
+async function copier(){ await copy($("post").value); toast("Texte copié ✅ Collez-le dans le groupe"); }
+async function copierLien(){ await copy(lienCommune()); toast("Lien copié"); }
+async function copy(t){
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); }
+}
+async function partager(){
+  const t = $("post").value;
+  if (navigator.share){ try{ await copy(t); await navigator.share({ text: t }); }catch(e){} }
+  else { await copy(t); toast("Texte copié : ouvrez Facebook et collez-le"); }
+}
+function groupes(){ window.open(`https://www.facebook.com/search/groups/?q=${encodeURIComponent(cur.nom)}`, "_blank"); }
+function toast(m){ const t = $("toast"); t.textContent = m; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 2200); }
+
+/* ---------- Classement par département ---------- */
+async function classement(){
+  const dep = $("dep").value, mini = +$("mini").value, tri = $("tri").value;
+  $("clsErr").innerHTML = `<div class="card"><span class="spin"></span>Calcul en cours (cela peut prendre quelques secondes)…</div>`;
+  $("clsCard").classList.add("hide");
+  try{
+    await champs();
+    const qd = `${F.insee}:${dep}*${maison()}`;
+    const [fgA, totA, comm] = await Promise.all([
+      aggSafe(F.insee, `${qd} AND ${F.label}:("F" OR "G")`),
+      aggSafe(F.insee, qd),
+      fetch(`${GEO}/departements/${dep}/communes?fields=nom,code,codesPostaux`).then(r => r.json())
+    ]);
+    const noms = {}; comm.forEach(c => noms[c.code] = { nom: c.nom, cp: (c.codesPostaux||[])[0] || "" });
+    const fg = {}; fgA.list.forEach(x => fg[x.value] = x.n);
+    let l = totA.list.filter(x => x.n >= mini && noms[x.value]).map(x => ({ code: x.value, ...noms[x.value], tot: x.n, fg: fg[x.value] || 0 }));
+    l.forEach(x => x.p = Math.round(100*x.fg/x.tot));
+    l.sort((a,b) => tri === "nb" ? b.fg - a.fg : b.p - a.p || b.fg - a.fg);
+    l = l.slice(0, 50);
+    $("cls").innerHTML = `<table><tr><th>#</th><th>Commune</th><th class="r">F/G</th><th class="r">DPE</th><th class="r">%</th></tr>` +
+      l.map((x,i) => `<tr class="click" onclick='analyse(${JSON.stringify({nom:x.nom,code:x.code,cp:x.cp})});$("q").value=${JSON.stringify(x.nom)}'><td>${i+1}</td><td>${esc(x.nom)}</td><td class="r"><b>${x.fg}</b></td><td class="r">${x.tot}</td><td class="r"><span class="pill" style="background:#fdecea;color:#c62828">${x.p} %</span></td></tr>`).join("") + `</table>`;
+    $("clsCard").classList.remove("hide"); $("clsErr").innerHTML = "";
+  }catch(e){
+    $("clsErr").innerHTML = `<div class="err">❌ ${esc(e.message)}</div>`;
+  }
+}
+async function aggSafe(field, qs){
+  for (const s of [500, 200, 100]){ try{ return await agg(field, qs, s); }catch(e){ if (s === 100) throw e; } }
+}
+
+
+/* ---------- Image du post ---------- */
+let LOGO = null;
+try{ const d = localStorage.getItem("dpe_logo"); if (d){ LOGO = d; $("logoPrev").src = d; $("logoPrev").classList.remove("hide"); } }catch(e){}
+$("logoF").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => { const r = Math.min(1, 600/img.width), c = document.createElement("canvas");
+    c.width = img.width*r; c.height = img.height*r; c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    LOGO = c.toDataURL("image/png"); try{ localStorage.setItem("dpe_logo", LOGO); }catch(_){}
+    $("logoPrev").src = LOGO; $("logoPrev").classList.remove("hide"); toast("Logo enregistré"); };
+  img.src = u;
+});
+function wrap(x, t, cx, y, maxW, lh){
+  const w = t.split(" "); let l = "", lines = [];
+  w.forEach(m => { const test = l ? l + " " + m : m; if (x.measureText(test).width > maxW && l){ lines.push(l); l = m; } else l = test; });
+  lines.push(l); lines.forEach((li,i) => x.fillText(li, cx, y + i*lh)); return y + lines.length*lh;
+}
+function loadImg(src, cors){
+  return new Promise(r => { const i = new Image(); if (cors) i.crossOrigin = "anonymous";
+    i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+}
+function fit(x, t, maxW, size, weight){
+  let s = size; do { x.font = `${weight} ${s}px system-ui,sans-serif`; s -= 2; } while (x.measureText(t).width > maxW && s > 18);
+}
+async function image(){
+  if (!cur) return;
+  const cv = $("cv"), x = cv.getContext("2d"), W = 1080;
+  const lien = $("lien").value.trim() ? lienCommune() : "";
+  x.textAlign = "center"; x.textBaseline = "alphabetic";
+  // fond
+  x.fillStyle = "#2f7d4f"; x.fillRect(0,0,W,W);
+  // bandeau logo
+  x.fillStyle = "#fff"; x.fillRect(0,0,W,170);
+  const logo = LOGO ? await loadImg(LOGO) : null;
+  if (logo){ const k = Math.min(700/logo.width, 130/logo.height), w = logo.width*k, h = logo.height*k; x.drawImage(logo,(W-w)/2,(170-h)/2,w,h); }
+  else { x.fillStyle = "#1f5a37"; x.font = "800 70px system-ui,sans-serif"; x.fillText("Ouest Eco Logis", W/2, 110); }
+  // bandeau ISOLATION PAR L'EXTÉRIEUR
+  x.fillStyle = "#ffd54f"; x.fillRect(0,170,W,120);
+  x.fillStyle = "#1d2622"; fit(x, "📍 PROPRIÉTAIRES À " + cur.nom.toUpperCase(), 1000, 40, 800); x.fillText("📍 PROPRIÉTAIRES À " + cur.nom.toUpperCase(), W/2, 218);
+  fit(x, "ISOLATION PAR L'EXTÉRIEUR", 1000, 62, 900); x.fillText("ISOLATION PAR L'EXTÉRIEUR", W/2, 276);
+  // chiffre
+  const pct = cur.pDG;
+  const sous = `des maisons de ${cur.nom} sont classées entre D et G`;
+  x.fillStyle = "#fff"; x.font = "900 170px system-ui,sans-serif"; x.fillText(pct + " %", W/2, 450);
+  x.font = "600 42px system-ui,sans-serif"; let y = wrap(x, sous, W/2, 510, 940, 52);
+  x.font = "400 26px system-ui,sans-serif"; x.globalAlpha = .75; x.fillText("(DPE réalisés depuis 2021, source ADEME)", W/2, y); x.globalAlpha = 1;
+  // kit / pose
+  const by = y + 25;
+  x.fillStyle = "#fff"; x.beginPath(); x.roundRect(50, by, 980, 150, 26); x.fill();
+  x.fillStyle = "#1d2622"; x.font = "800 46px system-ui,sans-serif"; x.fillText("🔨 KIT à poser soi-même", W/2, by + 62);
+  x.fillStyle = "#2f7d4f"; x.fillText("👷 ou POSE clé en main", W/2, by + 122);
+  // bas : estimation + lien + QR
+  const top = by + 175, qrS = Math.max(150, Math.min(230, W - top - 30));
+  let qr = null;
+  if (lien) qr = await loadImg(`https://api.qrserver.com/v1/create-qr-code/?size=460x460&margin=0&data=${encodeURIComponent(lien)}`, true);
+  const zoneW = qr ? W - qrS - 110 : W - 100, cx = qr ? 50 + zoneW/2 : W/2;
+  x.fillStyle = "#fff"; fit(x, "Estimation GRATUITE en 2 min", zoneW, 50, 900); x.fillText("Estimation GRATUITE en 2 min", cx, top + 55);
+  if (lien){
+    const court = lien.replace(/^https?:\/\//,"").split("?")[0].replace(/\/$/,"");
+    x.fillStyle = "#ffd54f"; fit(x, "👉 Votre simulation : " + court, zoneW, 38, 800); x.fillText("👉 Votre simulation : " + court, cx, top + 115);
+  }
+  x.fillStyle = "#fff"; fit(x, "📞 06 45 62 42 85", zoneW, 54, 900); x.fillText("📞 06 45 62 42 85", cx, top + (lien ? 185 : 130));
+  if (qr){
+    const qx = W - qrS - 50, qy = top;
+    x.fillStyle = "#fff"; x.beginPath(); x.roundRect(qx-14, qy-14, qrS+28, qrS+28, 16); x.fill();
+    x.drawImage(qr, qx, qy, qrS, qrS);
+  }
+  cv.classList.remove("hide"); $("imgAct").classList.remove("hide");
+  if (!lien) toast("Ajoutez le lien de votre page dans Réglages pour l'avoir sur l'image");
+  cv.scrollIntoView({behavior:"smooth", block:"center"});
+}
+function blobImg(){ return new Promise(r => $("cv").toBlob(r, "image/jpeg", .9)); }
+async function partagerImage(){
+  const b = await blobImg(), f = new File([b], `uniso-${slug(cur.nom)}.jpg`, {type:"image/jpeg"});
+  await copy($("post").value);
+  if (navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f], text:$("post").value}); toast("Texte aussi copié : collez-le si besoin"); }catch(e){} }
+  else telecharger();
+}
+async function telecharger(){
+  const b = await blobImg(), a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = `uniso-${slug(cur.nom)}.jpg`; a.click();
+  toast("Image enregistrée");
+}
+
+/* ---------- Groupes & historique ---------- */
+const DELAI = 21; // jours minimum entre 2 posts dans le même groupe
+const lire = k => { try{ return JSON.parse(localStorage.getItem(k) || "[]"); }catch(e){ return []; } };
+const ecrire = (k,v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const norm = t => (t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();
+const jours = d => Math.floor((Date.now() - d) / 864e5);
+const dateFR = d => new Date(d).toLocaleDateString("fr-FR", {day:"numeric", month:"short", year:"2-digit"});
+
+function ajoutGroupe(){
+  const nom = $("gNom").value.trim(), url = $("gUrl").value.trim(), com = $("gCom").value.trim();
+  if (!nom || !/facebook\.com|fb\.me|fb\.com/i.test(url)){ toast("Indiquez un nom et un lien Facebook"); return; }
+  const g = lire("dpe_groupes"); g.push({ id: Date.now().toString(36), nom, url, com });
+  ecrire("dpe_groupes", g);
+  $("gNom").value = ""; $("gUrl").value = ""; $("gCom").value = "";
+  document.querySelector("#pubCard details").open = false;
+  majGroupes(); toast("Groupe enregistré ✅");
+}
+function supprGroupe(id){
+  if (!confirm("Supprimer ce groupe ?")) return;
+  ecrire("dpe_groupes", lire("dpe_groupes").filter(g => g.id !== id)); majGroupes();
+}
+function dernier(gid){
+  return lire("dpe_hist").filter(h => h.gid === gid).sort((a,b) => b.date - a.date)[0];
+}
+function majGroupes(){
+  const g = lire("dpe_groupes"), c = cur ? norm(cur.nom) : "";
+  const lies = g.filter(x => c && norm(x.com).split(/\s*,\s*/).includes(c));
+  const autres = g.filter(x => !lies.includes(x));
+  const keep1 = $("grpSel").value, keep2 = $("grpSel2").value;
+  const opt = x => { const d = dernier(x.id); return `<option value="${x.id}">${esc(x.nom)}${d ? ` (dernier post : il y a ${jours(d.date)} j)` : ""}</option>`; };
+  $("grpSel").innerHTML = !g.length ? `<option value="">Aucun groupe enregistré : ajoutez-en un ci-dessous</option>`
+    : (lies.length ? `<optgroup label="Groupes de ${esc(cur.nom)}">${lies.map(opt).join("")}</optgroup>` : "")
+    + (autres.length ? `<optgroup label="${lies.length ? "Autres groupes" : "Mes groupes"}">${autres.map(opt).join("")}</optgroup>` : "");
+  if (cur && document.activeElement !== $("gCom")) $("gCom").value = cur.nom;
+  infoGroupe();
+  const c2 = norm($("chCom") ? $("chCom").value : "");
+  const l2 = g.filter(x => c2 && norm(x.com).split(/\s*,\s*/).includes(c2)), a2 = g.filter(x => !l2.includes(x));
+  $("grpSel2").innerHTML = !g.length ? `<option value="">Aucun groupe enregistré</option>`
+    : (l2.length ? `<optgroup label="Groupes de ${esc($("chCom").value)}">${l2.map(opt).join("")}</optgroup>` : "")
+    + (a2.length ? `<optgroup label="${l2.length ? "Autres groupes" : "Mes groupes"}">${a2.map(opt).join("")}</optgroup>` : "");
+  if (keep1 && g.some(x => x.id === keep1)) $("grpSel").value = keep1;
+  if (keep2 && g.some(x => x.id === keep2)) $("grpSel2").value = keep2;
+  infoGroupe();
+  // réglages
+  $("grpList").innerHTML = g.length ? `<table>${g.map(x => { const d = dernier(x.id);
+    return `<tr><td><b>${esc(x.nom)}</b><br><span class="muted">${esc(x.com || "")}${d ? ` · dernier post le ${dateFR(d.date)}` : ""}</span></td><td class="r"><button class="b-sec" style="padding:6px 10px" onclick="supprGroupe('${x.id}')">🗑</button></td></tr>`; }).join("")}</table>`
+    : `<div class="muted">Aucun groupe. Ajoutez-en depuis l'onglet Commune.</div>`;
+  const h = lire("dpe_hist").sort((a,b) => b.date - a.date).slice(0, 40), noms = {}; g.forEach(x => noms[x.id] = x.nom);
+  $("histList").innerHTML = h.length ? `<table><tr><th>Date</th><th>Groupe</th><th>Post</th></tr>${h.map(x => `<tr><td>${dateFR(x.date)}</td><td>${esc(noms[x.gid] || "(supprimé)")}<br><span class="muted">${esc(x.commune)}</span></td><td>${esc(x.tpl)}</td></tr>`).join("")}</table>`
+    : `<div class="muted">Aucune publication pour l'instant.</div>`;
+}
+function infoGroupe(){
+  const id = $("grpSel").value, d = id && dernier(id);
+  $("grpInfo").innerHTML = !d ? "" : jours(d.date) < DELAI
+    ? `<span style="color:#c62828;font-weight:600">⚠️ Déjà publié ici il y a ${jours(d.date)} jour(s) (« ${esc(d.tpl)} »). Attendez au moins ${DELAI} jours.</span>`
+    : `Dernier post ici le ${dateFR(d.date)} (« ${esc(d.tpl)} »). Pensez à changer de modèle.`;
+}
+$("grpSel").addEventListener("change", infoGroupe);
+
+async function publierVers(id, texte, prepImage, blobFn, nomFichier, tplNom, commune){
+  if (!id){ toast("Choisissez un groupe"); return; }
+  const g = lire("dpe_groupes").find(x => x.id === id); if (!g) return;
+  const d = dernier(id);
+  if (d && jours(d.date) < DELAI && !confirm(`Vous avez déjà publié dans ce groupe il y a ${jours(d.date)} jour(s). Publier quand même ?`)) return;
+  const w = window.open("about:blank", "_blank");
+  await prepImage();
+  const b = await blobFn(), a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = nomFichier; a.click();
+  await copy(texte);
+  const h = lire("dpe_hist"); h.push({ gid: id, commune, tpl: tplNom, date: Date.now() }); ecrire("dpe_hist", h);
+  majGroupes();
+  if (w) w.location.href = g.url; else location.href = g.url;
+  toast("Image enregistrée et texte copié ✅");
+}
+async function publier(){
+  if (!cur) return;
+  await publierVers($("grpSel").value, $("post").value, async () => { if ($("cv").classList.contains("hide")) await image(); },
+    blobImg, `uniso-${slug(cur.nom)}.jpg`, TPLS[tpl].nom, cur.nom);
+}
+
+/* ---------- Chantier en cours ---------- */
+const CH_DEFAUT = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCADwAPADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6A8ReINeXXtRjj1i8SOO5kjWOOdo1VVbavyrWb/wkPiD/AKDuof8AgTJ/8VU/iNf+Kh1T/r8m/wDRjVL4U0H/AISTxHYaK0mxLiX523bW8tV3Nt+X721W20AU/wDhIfEH/Qd1D/wJk/8AiqzfEnxC1Twb4b1fxheeItRig0Oxmvmb7TJ95V+Vfvf3ttez+K/iFN4P8W2ug6PZxW+k6ft+2W0Vsq7/ADPmbb/uq25fu/Nu3blr5c/4KaNb+D/BWkeF9Bt1t/8AhONQVWig2xqq2m3cvlqq/KzSQt/vbqAPlr4KSatJouqeML66n+3+ItQkmlk8xt0iq27d/wACkZv++a7qw1LUFR9uoXH+sZv9a396jwa154HTQ5NHm+z3mg/Z5LaXareXNG3mbtrfK37z+9Xuvwy+PX7R3xG8YaP4PsfiBsn1S78tpf7KsP3UK/NJJtaNd22NWbbu+bbtoA8IvtS1Lfbr/aFx/rP+erV3H/Cvfih/YH/CSfYbj7H/AGf/AGts/tCP7X9h8zy/tP2bzPtHlbv+Wnl7dvzbtvzV6j+3P400/WvHnh7wXZrul8NxTSXcu5v9ZcrG3l7dv8MccbblZv8AWbfl2tWR/wALw8J/8J9/wvD+z9W/4TX+zvL/ALM8qP8Asv7d5P2b7R53med5Xk/N5Pl7vM+XztvzUAefeA/hb8XPiY2o6l4J0W/1G1s5I7eWdryOCPzGXd5atNIu5tu3cq7tu5d33lpvjrwL8SvhndW9n440+/0176JpLZmuVmjlVW2ttkjZl3L8u5d25dy/3lr1r49X154X+A/wj8I6DdT2eka1pTahqFokjbbmby7aXczN823zJ5JNv3dzL8vyrt8Cu9W1a806z0m81S8nstP8z7HbSzs0Nt5jbpPLX7se5vmbb96gDNt9S1D7XP8A6dcfe/56tXV+Fbq6ukuI7i4eVV2su5t23du/+JrjIP8Aj5uP96uu8HdLz/tn/wCzUAaV0v8AxMrfd/car4/3apXK/wCnwf7rVd28LQAj7sfLVDTNvlMv+01X33Krfw1Q0z/Vv/10agC7/DTX+61PH3aR/moAzdNVV81dv8dX/vfLVGw+V5/+ujVeXdQBDd3VrY2895eTRQW8KNJLLKyrHGq/MzMzfdWub03xZpPiqwuJNNa4ilt/Jkktru2aCfyZlWS3m8uT5vKmhaOaNv4lZf8AaVfXP2ZPgjpv7RmpT/ETxxJbz+APDeqyWdr4cZ1abVtSt2XdJqcP3oYI22tHaSKrS/LJMvl+Wsns/wAYvhP8O/2tvDC/ED4P+MNKTxp4debTdM16Bmkgn8ttzadeqvzSWkm5ZI5F3MqzR3EO6OT98AfLls37pG/2al/4DVP4KW+h/F7x/wDD7wz4itbxNN1LXtQ0/Vbax1eaGOWS20y+kZYb20kVbiLzoY2WSGRo5Nv+8tfQnxE+Hf7D/wAK/EieEfGkPjS31aSxj1LyLPV/Ft/tt5JJY45Ga1lkVdzW8y7Wbd8tAHg53f3fvVE38VdT8Gvh38Jfip+054h8I6bD4ruPh3HpWoalodtc6vrVhMzRx6FG0m6aWO6ZVmuL1VWRtvzNt/hrJ8feE9H8B/Fzx/4L8NreppGj6vZx2cF3qE97JEsmlWM7L51xJJJt8yaRvmb+KgDmbRdt7Krfw1pt92u9/Zl+DfgH4wePvHlv8QLHVL2LRdM0OSxS11y/sFia4m1Dzm22sse5m+zw/e3fdqf9m34G/Dv4jfEv4teGfGVrr1/pvg/VZLHR4l8TanA0EP8AbGsxbWaGdWmby7a3XdIzNtjX5qAPN2Wnf7O2vS/hP4Z/ZB/aO1O68D+BdD+KfgbxCukWviaxubzxHczTS6f56r50KyXd3asu7y42jnj3bZvlX7zL5ZFY6loOt+IfBOuapb6pqXhPWLjQ7nUIFjWO98va0c22OSRY5Ghkh8yPdujk8yPau2gD6e8RL/xUOqf9fk3/AKMatf4YSQ2/jzS5JpERd0ke5m2/M0Miqv8AwJm21meJF/4qDVP+vyb/ANGNWfDJNbzJcW8jxPGyskiNtZWX7rLQB1nxUsbyT4g3scdrKz3X2fyFWNv3v7uNfl/vfMrLXkH/AAUQtfDuteN/hfY3V1Bc3+j22rag1ms6+ZCs0lksM0kf3vLZoZlXd8reXJ/davYPE/xw0PQ9HuPHnizwXaXV14bs5rz7THd+T8q7mVVVlb5t21V3M21m3LX5b6/8b/FXxv8AjfL8ZfiPDb+bZ2LNHBaLN9isfItJPs6wxzSSNGvnL523d/rJJG/iaumlh51oTqRTfIr2Su35JdWyKlSMFeTt67fM9ndmb943zM33q+m/2S9J0/4e/C3xb8dtat/3sMFxa6elyzW0csce2Rljkb5W8648uFflba0O1d25lr4o/bE/a0X9qa28FXC+A18Mt4fXUmaP+1ftvm/aGgX/AJ5R7dv2f/a3bv8AZq18UP2uI/iB+zzpfwF8C/Dv/hDPCvhmK3judur/AGmfVGX5Y/O8mCCP5pPMnk/dt5k22T5WX5vRp5JWkoqX2t/L8TCeKhFc0f66HY+ItW1DXNefXNWuPPvdQu5rq5l2qvmTSNuZtq/KvzN/DTa+NFVmKqq7mb7tb3jlWXXPmZmbyI93/fNdUeH+aDnz7eX/AATOeM5asafL8V/wPv3wN8erHTfANx8KfiF8P7Pxf4ftblbrTUa8aymtGZmkbbJGrM3zM21l2t+8kVmZW2rz/wARPGnhXxZDpOn+D/hzp3hKw0uKZdsU7XNzcySNuZprhlVpFXau1W3bfm+bayqvxV8N7iO38URKyszTRSRrt/vbawdUha31G4hP3llaj/V/917Xn622/wCCKON/2h0LdLn1pbf8fNxu/v11/g77t5/2z/8AZq+Ovh6yrq10v8TWcir/AOO1zQVlLKy7Wq48OXhGXtN79P8AglRxfNVdG2yT++/+R9+XX/IRg/3Gq6vzKtfCfgxo18T6c00yxL5v3m/vba6D4pXSzX8MKxr/ABMjfxba7qXB/tMPOv7b4fL/AIJx181lSxMMNGHxdT7Lb+LfVDS1+R/+ujV8FLXrfwourpvB+sxsu6KFtsbL95fl3U8Dwh9brKl7a1/L/gjzPNZZfhniOTmtbrbrbsfVQ6bqY+2vhR4b6xv7i8ZWVF8zc/8AvVQhWOOT/j4dVZflkjX73+zWU+FOSVva/h/wTenmHtI88Yn3TYf66df4fMq9/u184/CO+tV8K6jaw2s8TRsyyM3/AAL/AMeri76TT9J+0TR+UVaRvNZV+8277td0uB+WhCv7bfy/4J40OJJSxVTDez+G3Xe/yPvr9kPwH8PfiRD8V/C/jjxFrGm+PvFFqtjqui2N01pBHocbbbW7ttreXqKszbZJp4227mtpIY4ZGW49Ij/Z18E/C/4S/EjWvj98SpbLTtc0iTSdV1HR7ufTYINLWRvJZY1ZmmuZGk3eXJ5qr5zW0azLJcNc/l74e17XvAvizSPE3gPWptE8QaPJ/aFpqEH+ugZl27fm+Vo2VmVo23KysysrK1em/Hf9qT4gftMTaXcfECS30bRNB8lbbRNOeRbT+0PLVZr+Td80jMzSLGrbvKjbau5mkkk8erwviI4iNGErxl9rsevHNKTpe0lH/t09x/ZVbVP+FtfCOPVLVoFh1zUIbPzLRbSaWzXRdSW3kmto2aO2laPbuhWSRV/vfwr7J+2r4i8N6p4k1v4XyfAfwV4l8Qah4JX7N4s1mWOO70v7XJfQQ/Z/9Emk/cyQyTLtkj+aT5dv3q+RP+En8WeCG8OeOvBesXWk6xoha4tL6KCCVomkgeBv3c0ckbbo5ZF+Zf4q4T4l/Evxp8YfEJ8Q/EjxfPruqLYw6etzJaW1s6WsckskaqtvFGv+smkbcy7vmr0cTwTiKFaMPae53/4F/wBTysHxPSxdGU+W0ou1v+CfcH7J/wDycdb/APYk61/6X6VXS/Fr9mH41eKPi34y8beEf+EIn0nxFeWt5bf2jrV3bXMfl6daWzK0cdlMv3rZmX9591lr849F1rxN4Rvm1zwT4q17w/qMcUlu8+kajNYSSwsys0bSQsrbWaONtu7buVa3LX43fG77R5bfHT4kTrGu6VW8X6ju/wBn7stclXg/FRqctOa5fn/wTvhnVGUeaUWfev7CX9pQ/Ev4wabrFrb29/pK6XpN3HbTtPD51pf63bSNHI0cbMrNCzLuVfvfdrT/AGNv+S0/H/8A7GGb/wBP3iCvibwHrPifT9I1TxBoPizxjYatqT+dqF3Y+JL+0nvW82WXdO0cqtM3mXEzbpNzfvG/vV6TpWm3Gh3N1qGg+KPFuk3mofNfXOn+KNRtpr1vOll3XEkc6tM3mXFw26Tc37xq87Ocir5LGEqzT59rfL/MrK85oZrOpTpJpw3v5n0f+z98SvBfxW+F3ijS/wBnXwL4N+C3xS1LSI76Kx/siCSKS3bd9mvVa3jh+0xqs23c0beRNJ+8hkVlWb5p0S31LQ5tR8I+JLPVLDxRo93J/b1rq87T3v2yaRpZJ5Jv+WyzMzTLMvyyK25dv3VfbeHdP0/+yG0mS/0u48Pp5OmXmm6jcWl3aR+X5TLHcQyLMqtH8rLu+b+LdVxrWaTUZ9Y1LWNb1a/uII7V7vV9ZudRl8mNpGjjWS4kkZVVppG2r/z0avDPXPqPxIv/ABUOqf8AX5N/6Mas3aa9V8HrHHr3jC8khig+ytNImpMiyNZNuk+6v3m3Lub5f+ee3+Kue8a6xrWqWsUP/CRS63payq32n+zvs0a3Hzfu/u/e2/N/wKgD5L/bZ8Vf2P8ACO18G2sy/bfFmpRxtBt+Zre3ZZPl/wC2nl182fAT4B+LPjFqWh/D3Q76C1HjiVr6fUPs0k66Xp9k0sc8823+8zeWqsyq0kkKsy+Z8v6CeO9Qk8SfE5dJkuv2Rr/TdBj2/Zten+061aTbd0n7v7tuvmbf/Qv9muO/Z817R4f245tLXWPhFFbzfDSSx0y2+H1zH9gkmW/ikkhZf4rvbDNI0a/dt442/hau/Cupytx2Vn917elnZ/K1tTkxUFWlGEv6tY+YfiH+x94Vt/hJ4l+InwX+PumfExfh/c+Trmn2OhyQTRW7SNuuY2WWbzIl+95m3yWjhmkWT92yt89eDPDOseMLxfC/h2FrjVtYvLPTbG08xY1nuLiZY449zMqruZl+ZmVa+xf2TdNvvBP7OX7Uc3i7Tbrw/BH4Vj0NpdTRrZf7SW01CNrTdJt/frJc28fk/e3TRrt+Za+YPBMfj74Y6PoPxqtfBN+un2Ov2d9pGq32nzLpt3dW1x5iw+d8qyfvIJFZVbd8sn3dtfUYatKVScZSvbb/AMBOSrHlpR5V1/8Abj6KT/gnj4N/4TNfg637VHh5fin/AGN/ajeGl0ObyfO8nzPI+1+b/wAC2+X53k/vvJ215rpfwb+DPiLVb3Tvit8eLj4b+J7O+bTf7DfwZe6lLIsccf75pIWVY28zzI2jb5l8v5vvV9dfs8+MvgP+09+1FYfHrwb8O/idpPjnS9MWTX5fMspPD1tM1lJaK00jSeczNG3kxrGsfmeSsjQrtmasvwD8D9A+IH7QviHxgsa3reJNdvtSgudkitbabJNJJ5m1o/3bMrKq7l+8yq1eBmHEdPJ8LOOIk3OXKorS7lrotNurfRfc9Z4WeIxVP2Xn92mrOcH7F3gf4H/D3/hPrP4gP4rvdagkWza50NtOk8ny2bzo4ZJGk/hX5v8Apov+zX5/aqzPqd0zfe8+T/0Kv06/aE+J1v4s8X3mi6HNFFo2h2s1jpscTL5LrGvzSRqrMu1m+6y7f3ax1+YN9ua+uGf73mtu/wC+q8TgzNsTm2OxtWu7x/dqPbTn29Xf9dT2M1yf+zFQqSXvTTf/AKSdN8N9zateQ7UKtZyM25tu3bXMuqrNKsbblVvlaup+GvmfbNR2qn/Hq3zN/wCg1yzwyQzPDIu1l+8u6v1GlF+yh6v9D5mlL/banov1NnwT/wAjVpv/AF3/ALu7+Gtz4obptWVvmzD+7bcu3czf/s1jeBlZvFul7fveeu2t/wCKkUX9qPdxyM7s3ls38P8AF92vdw0f9gqeqPMxcrZrR9GcF/s1658IrW6bw5rEluzMvmfKv/Af7teSqvzf3q9a+FE103hTW4V3JEv3XT733fu0ZKv9sh8/yL4m5v7Ony+X5o881OGGO4vGkumW4V5P3TL/ALTVV09bWQyyXyz+VGv3o1+638NbcsMMRuvMhjunWRm3Ou6Rm/u/7tRWjRyQyww2KpcN5bSRs3yyf7O2s6kP3lzajW5aPL6Hp3wSZbrRtU+60/zM0n3mb73y1ymoQMLyW3uvKltWlbbuX5lbc1dn8INNWFdXuJFVWmVmSONvu/erj7q3uFu7pm/1HmszbvvN81erK/1eEP63f+R8jCopZrWlHsjEu7Vrq8eaaHe6rtjVW/1/91f+A1IPM8lV1DyndWXz40Xdt+b7u3/vmn36tdQLJZzS29qsn73crLKv+7T0hure6SGGGJU+VUeRvmnb+9/s1wOOp78Z+6ub+v6/rQ9j1iRZvBNrNNbqyeUu1d3zKvy/LXlSLCztb325vm875F+Xbu3KrNXrHy3HgO1WRdvlosnzf8tNteYzbWvJd0ex5FVmX+HbXsYyMpU4SZ8pk0rVK0V/MyteTR6xbXW2NklX5t8TfLHSQR2dvdS+Wu2WRVaVmX5dv+9V+aH7CsskMe1JPmRV+7/wL+9TZvJaGW8vmWRlX5lVfl3VxuDv7257Cq8q5Y7Honw7uobi1vIY5G+Vfvf3l/3a9eX+GvFvh21xJ56zLF/qt0bL8v8A47XtMXTdXxvH0ualhX/i/Q9HhGChi8V/27+oFqQtxt205m/vUm3b81fnB90fWl7rmsaD4p1a40fUJbd2vJtyr91v3jfeVvlb7zfeqh4m8faxNps+reJtSa4s9Himvmj8tY1/dru/hVdzfL/49XuNzoOi3kzXF1pNlPLJ96SS2Vmb/gVfM/8AwUK1rRfA/wCzbe6Lpek6bHq/jbUbfRbVFtV8xoVbzJmj+X73yxr/AMCoA+Jfhzazalc638RNSuvPvfFly19tb70cbTSNtb/vlfu189+EPHHizwD4usPHng3XLrSde0u5+1Wt5A37yOT+Ldu+VlZWZWVlZWVmVlZWZa+3PBXhWx0HQrLQ5rOB30+1ht2Zo1Zt23c3/jzNXwZsX+7X0fD9L26qR9P1OXEaNSPafjN+1l+0J8VtGn+H/j74kXWo6Cz2809nHY21os8ka7l8xreKNpF3Nu8tvl3Krbdyqy8xqvxZ+ImsfArRvhJqmvef4S0PWGvNN0/7Jbr5EzeazN5ix+Y3zXE33mb73+ytcp4t8tvEN15ezb+7+793/VrVy8jt18Cacyxr5rX0m5v9nbX1dPLYQqTjGK0ueVPESdGm5fat/me2aR+2N+0t8VvEejeDfG3xY1CfR7q8/wBJtrO1trDz18uRWjka1ijaSNlZt0bM0bfLuX5Vr6q0/wAZ+JfCFvcTeHr/APs+a+tPJnnSCPzfL/urIy7o/wC9+7Zfur/dWvg79nWzsbz4z+F4b638+L7ZuaPbuVvlb73+zX6b3Gi+HbzSk/4ldr/wK2VfmX/gNfz143YyOSvLXSVpXq6rTpA+r4TlHEZxOhU/kh+cv8j5XmWS6v7jUpGf5tNvtqt93/U18VX/AM1/cN/01b/0Kv0v1rwv4d0rUNb1C3t9PWIaBqDMjKu5ZGVV3bdvyr81fmxq6xrqt4qr8vnybfl/2q9zwmrrMI4mUNEoUvzqf5H1XiV7OnjMJTj/AM+2/wDyb/gHS/DdVZ9W3Rs3+if8BX71ccPlZlVt3+1XpHwijj8jXpFjV5Vtl+V4/l2/N/FXn13N9ouJJlhSLd/BGu1Vr93nhfZ4alUv3PyPC1efMK8eyj+pvfD6Nm8X6cy+X8sm7azfe+Vq3Pif9oXUfO2uiruj/dt8u1qxfh15f/CYac0jOrK+5WVf9mtj4m2obxCLuSWf7Hjb833lb5v4a9PC/wDIvn6nnYx/8LFPm7M4eFZJJFWGHezfdWvWfg2LiPw5rs9sWBUbWH975fu15Qkk292jZlZl2/L95lr1/wCDsjSaBq9v5brFtbym2/M33qMmj/tkPn+RfE8v+E6p8vzOFvIbhr68aFEiezk/d/3omb5maqOm2t5NMNUabzUjlbft+9ub+L/drTv5rv8AtlvIlkubpd25dm2N49zVWtriGzgnvNJjnllkbbsWPcsbfxLUVkvaF0Jv2MeVdF/XzPV/g5GsN3qVrG0Wzyvm2/w/M1crqCeZrV6snmrFHK3zL91vmat74MrqH9p3kl9sZLi2+bZ/yzb5vlqhqsm7WL3azXEUcrbNy7dvzV6NKHNS5vT85HyMr081q+iMO5haO6e4vpnVmVVjX+Lav3d1UbGFbrWZbhrf5mX5t33mk/vL/s1avGaayuma3cpI37tP7/8Au1X0u8bULi4Vt0DwqrLG67WZf7v+9XJOzlynvUuZQlI9ksZGvPAqeXGzvH8v7v8AhrgPsslxdvJdRsyKv3m/5af7td54dmjuvBk+6T/V/dkX7rNtriLhpmYNM0rKy7WVV+VW/wBmvanaUIyl/WiPlMFzU8RWjHuUZZPLVLdldJd+5f7rUk0Nx9kikWTcjK21f7tP3R/JatC25vuytTEa8a5eO3jfcrfLOq7lVa4JbnuRO1+Hyta6tukjR2ki2q1e0p9zb/DXh3gZpLfxFB9ojZXZW+b+Ft1e3w/NErV8Nx5BcuHlb+b9P8z2+FI/7RXl5R/9uJV/2qT71H+9R/tV+dn2p+lDLt+bdXwF+2J4ok+J37V3hz4Stv8A7I+G+nf2pfLu3K11Mqyt/u/ehX5q/QI3VrYpLqGoTLFa2cUl1O7fdWONWZv/AB1a/LX4WX11488YeP8A40ahGyz+MvEN1JArN/q7fzGk2r/s/vFX/gNAHb2TeZcXkzfea5b/ANBWvz202H7RqVrbttbzJ44/m/2mr9CbD7s//Xdq+APDdu114g06FWVd1zH8zfd+9X1fDC5pVF6fqcuKfLDmkO8TwwW/iC/htpvNiWdlWTbt/wB6tHUmC+BtIj+X5rmZv/HmrH1xvN1m9b+9cP8AzatjxB5lv4T8PWbKrKyzXCt/F8zV9wvirSj5/mjw5Rbp4eL8vybO6/ZShab416Isa52tu+7935lr9OV3TWSxzKu5vl+WvzV/ZAtWm+MFnNHeLbvDAzIzfdb5l/8Aia/Seyh3WjM0a/vGr+OvpE1/+FPB0ZP4YN/e7fofYcJcsc2nU8kvu5n+p5p8TYGtdD1+aG3hVl0G8Xe8fzfei3f+O1+X+rNG2qXjRtlGnk2t/wACr9SvjZCv/Ct/EbLIryx6ZJGrL/daaL5f/Ha/LXVFZNSuo2x8s8n3f96vvfASPtMqr1/OK+7mf/tx6PH2L9vnNGH8tFfjOR33woZv7J8Qq0mxJIo1Vv8Aa+bd/wCy151cK0crQsyt5bbdy/xV6R8JlX+yvEDTKyo0Sqrt93d81ed3KyW9xJGzIzL8vy/Mu3bX9H4j/caPz/M/N8F/yM8T/wBu/kbXw/uPsvjHS5t21Vl+b/vlq6b4jG2bWrcQyC5laXcyM3ystc78OlX/AITXS/MhZ1835lX/AHWrf+JDWVprEsAtfMlMyyO4PyN8zfK1b4X3cvn6nNjv+RtR9P1OIktZI7lZLhVgSaRl3Rt/q9rfNXqnwbZl0PXlid5VjVtn8P8ADXlU9u0cywr96Rv4W/d/8Br1v4PeY1nf2rK0C7W+ST7v8XzUZTpjF8/yFxHL/hLl/XU5G+jWES3FzM8rL5jRRRfu2Vd396s55rG3eD/Tv3OzckUHys7f7TVv6nbrNdz+dJsik3L/AL67v4f9msDzNNuIHkYMtrH+7bb975fu7qmvHlqcpOCn7SnE7/4MXd02uOt1Gy/uvM2/9M/m27v9qofEUlr/AGpdySzPFaxzltqL833mq78JGkXXFjaT7QskG5f7235vm/3aZ4mhmh8Q3S2+6dI3+8v3f4vlr0qH+7cv9dT5vESj/a0vT9Tn7yGa9guIrW+aKNtrJ/Cyf7tU2W4mneza1ZH2/wDHyrfeX+8v+1V64jmuLppmtYrhdqqrN/rF/wDsaUWNxbzO01wipt3Lt+9H/stXJOnzSPXhUUI8p6R4S87/AIQm6j+zqoj+VP8Aa+7822uPv7XbG8LXTfwtIqt92uy8A+TJ4euFkbdcN/372/LXIXPk/wBqeXDA+yP/AFit/FXrcv8As8eb+tEfNUJNY6tH5kUzRx20/mMreZ80TbflpnmeWIo4ZmVJPvMv3WqV1kuv9FkXbFC3y7furUcqtbt9jjjV5G+6q/d21hI9GP8AKbPhuSNdbt/tUkqru/dyL821v7te8W3zQq27+GvBPDH2qHWrWaTzVRpFVk/+Jr3iw/490/3a+C48+DD/APb3/tp9RwtH363y/Umpf4akphb5a/Nz7I+u/wBtzxTeaD+z7qnhzSbi1i1jx5dW/hew89tq/vm3Tt8vzfLCrf8AfVfKfgvQ4/C/g/Q/DsLK66bYwxyOv3ZJNu6Rv++mauv/AGz/AIht48/aT8KfCjRZmFh8OLSbWNVk+8rXky/d2/wsq+Wv/bSsG2+W2T/doAg0tv3Lf9dG/wDQq+B/B8ccnifTlm27PP8Am3Ntr710j/jzTd/Fu/8AQmr4N8EzRw+KbCabbtWRm+Zdy/6tq+u4TjepNea/U4Myly0W/Jmbqv8AyFLv/rtJ/wChVveMgI9M8ORLIGP9mRyMq/w7q5y5ma4nluJNu6SRmbb/ALVdD4ykWS08PLvTK6XF91drf8Cr7ODuqz8v1R5soSh7Bef/ALaz1z9i61W4+JkvmK23yNu7b9373/xNfopYRtHpyLD9/b826vz+/Yat5JviBqs3mKsMNmrSr93+F/m3V7n8YP2mtQ025X4X/A2KPxF4wuN3m3dqsc8Flt+9t/hkk+VvvfKv8X92v5V8aeGcx4n4oweEy+F37JOUvsQXPU1k+i0+eyu7I9jIsxoZbiq2Jr/Zf/tsX+v3bnYfGfxv4RFvL8LIdUifxR4nh8mz0+P5m2/K/mSMv+rVvLbbu+9X54eO/Cd74Y1qeLUE8rznZkTduavpbQfCOnfDu0uvGWu3suteP7hmuLzVblvMjtpG/hh3fNuXaq7v++dteB/EzxjNr13PHeNFLPv3Iyr8y1+v+FXDFDh3Ka1Kk3OLfxvS80l8K/ks929XqtD5zMuJK/EGf+3p/CoKFuyu3v317fdsWPhpHI3h7xDNJNtRfLXa396vPri3kt5V+2Q7Dt3Ku773+9/dr0n4WQ3H/CJ69Mlqsu6Rd29v4dteetZ3V5fSxwqzs25l3t823/ar9YxEb4Sj8/zMcHPlzDE/L8ja+HFx5fjWyaONUWaRl2/8812tW/8AEm2gk1B4FO+5Vt0SL/Ev8VYnwxW6/wCEss5I1TyGfy5WZd21dtdL43t5rPXLidZIoizK0rN8zIv91f8AerowvvZfP1OLMJRWbU7P7P6nBW8MO1Y7y4iWDzNzQK3zK1eqfCGCK4Os2jOzra223yI/mVPmb+L+KvKJFhuIVvmt2/17bm/vfxLXrvwe3N/a6yWbWcs1tu3K33m+ascufLX5o+f5BxHzfUJy/roctq9nJDqaTWtwvlW/mK6N/ErNVAqtxftHeWsTMq+ZBu+VZF/2v92tueab7ddW+LeVV8zc1Z8a+TC0keFaZfvS/wAP/wATW1Ze++XuYYWrKNKPN2/M7H4Rww/8JIjQ3Cs0m5WZm+WT5W/75Wk8SbY9XumaHdO052bW+bbubcrLTPhXb+T4nS4XYiSQeWqf3fvVf8WRr/b91Jb7d2753/2v4Vruw3N7K39f1qfPYuXLmv8A25+py9y14qrN5KxorbfLqGFmV/t11b/db513bt3+1VqGGS3TyZvNmeF5Jm3N97d/DUCyNNeRRx2/lJs3M0jbvm/u1hOP2j16cvsnpPw+/eaddbmV3b/Vf3du2ub1WOaG/X93Ez7mWRmba0ddJ4A3MLiGaFUZY9sTK3ysv96ucv1/0meGb7275mb/AMdr1Y/w+X0/X/I+bg/9vqS9DPVbiGXbMyv5km1V/vf7Tf7VRvY/Z5E+VWl3fvPm+6v+zU4hWZJLWaNmWFd27d/FTFWHy1vvO81Vk3LH/E22ueUOY9WM7GhYNax31u1xujWORfLWP5t3zV7pp25rZfu14BZ+c1/FdRzIqtJ5kiN/D/sr/dr33TW/c/8AfVfnvH75vYf9vfofW8Jq3tPl+pb2/LRt+bbto+Zv7tBVq/Nz7I434d3mpeN9c+I3xl1m6F1d+LtauFhnP3mt1m3bV/2f9Wv/AAGvUEZlt2b7u1f/AGWsHw/oMfhXwLo/h1V2tY2cMcv+1MzK0n/jzVsytttH/wCubf8AoNACaZ/x4Qbdv3a+DfBNvHNrqyTNtS3gmmk/3du3/wBmr7w035bKD/dr4T8FOYrzUJQ7KE064LbV+9935a+w4P8A48vWP6nnZrrh5ej/ACOfbbubb93+Gug8aRrHJpUKqNq6ZDt/3ea52uo+IHmf2rbLIu3/AEKLb+tfXQ/h1Zen5nBWl+/ox9fyNv4QaL498UXmoeGfA142nx3kW7Vb7zPLWO3VW+VpP4d3zfLuXd/31XtNjJ4X+DXg+bw/4baK8vbplk1HUmj2yzsv3Y1+9tjVt21V/wCBVxHwB1q4h8O69Zx/uPs8XmKyR7Wk3bvvN/E1cxrGtLdXj3ElwzJ5u1v+mjf/ABVc0cm+s4lYnGNOioxahbdpt+8+yaTSVtb3unY+TzKvVxuNqYKmuWMbc3ndK39ena56rPrGpa14DvNSmjZZZFbbu/u18567J51/PJ5aJKsnlyRr95q9z0eRV+GMrRqyo0knzSN92vDtQt2aa9vo5HdFk272+83zV9DjqcIUo8keW/8AkjHhikqOKrxWiTPQfh1tXwV4juLVURVnj2xv/wAs/lWvO9XWT+0dyzMrzRK0rL91v/sa9J+HVrbjwRq9x9oy7SL8235furXCT6hp9vqkXnW84SFPLVnTay/8B/u1niI82Eo83n+Z7GEny5jiOXXb/wBJRe+Gknl+NrJdyyrJujZv+A10HjmGS3v5fs8K3kas21n+7Wb8OLVrXxdbyWbOqQ3Tb2dV2su1vl/3q3/H0bW+sOzWvmySN8kbNtX5mb5q6cND/YJ+pw4+vzZrTt/IefW9rfSXP9k28ir5KSXTNtZti+XukZf9lV3N/wABavUvg/a3ULavp+oR3UE9rA0cjSfKysrNuVl/hZf7tcnoFvcRvqzNb26f8SXWN8nmbpG/0Cf/AMdr03wzbw2vjfxw1umz7ReXTStu3N/rpP4a8vBVZ/2i8PH+S/5/5HRn8lLKp1DznWLeOzv2uI7dpm8xoVZfu/M33qT7HK0DQyWclwn/ADyf+H/aat27hW6u3j3f6PCzMquu3bWXJNG1wsMLP833mb/lpXr1qSjNyPOw1aUqMYnQeAbe3k8SWfk3CM0bMrLH92P5a1vGMdrZ38u242ys3zLH/wChVmfD2RY9ft1WxdFWRl+7/Ftb5q2PE8zNqTwrYozbv3sjfw16OF/g/f8AoeFjZP8AtKPocrKsnnxSLeMy7fmX/npVVo/MbzrfZEv3WeT+KrGqQ7vNkkbb5f3V+7tX+9VJNqptaFm3N8q/3v8Aariqe7LlkezQ96PNE9G8DbfNuFVm/wBXuWP+L/drn9RWb+1JbXaqszM29v4V/u1t+BlVdSWPcxl8r5m/hb/ZqrrC29xr89rHbsSrbpV/uV6Ufejy+n6nz3Ny42foYSyMytCy7E/56/3WqGaFYYV2r+8t5V/4E1X5obW1d1WR/IWPzlXbVVGj8toWkZmZtyrt+6tYzh9mR6kJ/aiP0S3b7TPJdRLtWRWV1+9u3fdr3jTejr/tV4jbSeYiwybERfmba3/fNe26b8ryr/tV+dcfqMY4fl/vfofXcJScpVuby/U0Nv8ACtA+61Ju9qN38PzV+bH2hqanJ5lvt/iaSP8A9CWlvJNthLt/uNVe7k3JEqt/GtOvW/0KXb/doAsWbbbSJf8AZWvhXwU8kEmrXKMn7vTJl2t833q+6IW2wLt/u18LeFYV+wa5dbmDx2TRr/d2t97/ANBr7Hg/+NKXp+p5mbf7vL0/Mw7KFbi8t4W+7JKqt/31W/8AELyV8TyrGzNtjVW+b+KsPSl3anZrt3bp4/l/4FW58QfJbxC7R/e2/vNv3Vr7Cl/u1T/Ev1OCt/vlH/DL9DvfghFs0HxNd7jsEW1UDfMvytXJa7asz+Xa/wCraX5ZVX/V7vvfL/erq/g0yw+D/EVwSwk/1ak/dX5a5+N5I0u5su/3vmH97+6tevvgacfU+Xk5QzfEz7cv5HotvMtv8MnhZWlb5l3fw/71eLywtb3yKyu000jfulb5ZFb+L/Z/3a9rWHzPhpax7mh8zzG2fxM3zV5Zb6fYpMlytxL5rLukedtzbv8A4mtcwh7lLl7f5HPkVVQrYiX947DwVb7fBPiCzmjSP96vlbf4vlWuB13zLWWykumiabZHHK7fMqqv+zXonhm1htfCWqQx73dp1Z/9quF1SxjvL6K1ktJdijzFl3fd/wBmssRDlwtOPr+Z2YCqvr1aT2uv/STofBi6fZ61BdG6XyvtLTM8r+XHH8v3mZvlVf8AerY8UGPV9S81PE3hl0/v/wBvWS7f/I1Z3gRZG12ykZpYJVbzkdW/8d/3q6XxZ4q8QW995Nv4m1xFjbc/lXkiqv8A49UThj5YNyw0oKPmnf8ABmMqmF+vr26blbpb/I5C5uZfDOoPp+mra/avsqteagyQ3sfk3MKv5MPmbo2Vo5F8yTa27dtXau5pOz8CeJILy/1e+8Q3VlBe/Y2uJL6Ro7S3u4fOWNmk+7HHMsksfzfKsnmfdVlbzOVv9PuPF1z/AG9datFZ6jDbSTXMt00rRXdvbws3mM0ayMsqxx/3W8xY1+6y/vO28AaS3h3VdXsftXnatDE1nPc2e6OO22tuaGHdtZvmVd0ny7tq7VVV3SfP4SlWlX5I/wAfq3tb/K2y3vqejms8P9Scqv8AB7Le/wDn+BzN/Z6XM8n2fxN4cb5m2s2v2W3azf8AXWsm1huI7hY2VHaT7sfmf6vbXWav4m8RR3kvl+LNXiRX2sq3k3/xVcqlrb2qM0fyyyNuV1+81fQxhi41H9at8rr87nl054aVKP1e/wA/6R03g+8mXxDZbl27m+dd1bvjdYft/kzLKySfN8jbawvBjW8er2U0nlP8/wAu3/lnW945WaTUFZtxVflVV+81exQ5uVej/wDbT5rGW+vw9Djbn/U3TNtVlVVjZm+8tRW0kLCJrqNti/LBt/vf7VT6jZr5sq3Ee5tq+Vt/9mo8n5Vj+VZWXc23/wBCrKcJcx7NOceQ6rwR5a6j5ckjKrL+6jX+Gn68si6pdTR2+xY9qtKrfN/3z/FTPB/krqXnfMu37u2pfFi2dvfSTSearSfM2z7zLXoUublPnasv9v8AkYMkkkdw9u0iNFM21W21Vljkjd2+VZWb5tv8X+7UskP7nzo45XjZv4v4atfZ4/JWONttxuXb/e21i4yqXPWjKNPlIIoVaJI5mX725W2/6xv7te4WLbbmVf8AarxF7dctDNJIs7N8ka/eb/ar2y2+W/fdX5v4gx5fYf8Ab36H2XCEub23y/U0W60fLimnbR96vzQ+1J5pN7RLu/ip983+jMv96q5bdKn+zS3jboVVW/iWgC/C3yKu7+Gvhnw/ut/D2uXTLhJIlhVv9pt1fcO7atfE+kxzTeCtSVV3xLOrMi/e3bfvV9nwdH95V/rozys4t9X97uvzRieH18zXLBf+nmP/ANCre8X29vdeKbqGS4GzY21/uqrfN8rVneErOSbxJp0attZpVaNt393+Gul8TWcjeK3kt1iWK63Lcx/w/LX21ClL6rL1X6nj4ytGGNhG/R/odR8KJIbfwLq63CqE8xmVl+bc3/xNcrK0yzrHatxMsjSq38Lfw7a7H4fabCvgbV/Ljy7StIqbvlb/AHawrmxtZhKrRs6qys21trbl/u163sn9UpxXmfMQrQ/tCvU7tfkdmtu0ngO1hkWWXczKzf3a84S1W3juo7W3iZY59rbn+7/u/wC1/s16bcxtD4JtbeaRmWTc0ao3zf8AfVcHNC3mqscLMu7cu3+7/tV0Y6n7lL0ObKqrU63mzqtBtVtfCurTMrI9xJGzM3/LP5VrhNStbfydt1cPLEq7nVW+9/tNXoOg2cn/AAh95azXBuv3is0rfLu/2a4ia3kuJntbrayNtVY1X+H/AHqxxUP3ENDfA1bYmtLm6r8kbfge3hs9UsJFh+ST7iyfeZf7tWvFy/br15OYvs7fL8v3qPCFuserQNJvZ/urGzfeWrniu3muLr+FWjVmZfu/L/8AFV10Yf7FKJx4ir/woqV+hh6fFbmDWXW1ZWXRdU2urbl3fYJ927+7XdaKv/FeeK5GXbturhVdW/6bSV55a2+6GKZo54Io2bc3mfK3/Aa7b4dW9uuq3F5byFt1t5bKzfL/ABfNXlYbBy+ufW4/yWt97/U7M0xUXl86Bi6tMsl9dfu18hd27bVIeX9n+0XCq8u35V/ur/DWzqqyR3s9usMaP5jMrfwrWT5nz/apo1Vd3l7vveb/AMB/hr2K8b1HzHDhZc1KNjW8JLHdapZrJCy+W3mSKy7a6Dx3bzfbrdY5Nm5dzu33VWsvwzaw/wBr2f2W6ZGjfc/mfN8v92tvxtG0jRRzfKkPzNKzfK3+ztq6cXHljfv+h5OMq/7dCUTi90l1IzXCuqK21Wb7zLUcklqupJ5LbYvuxs38VXNs0n7u3k+aFWb94tRW03nXjLtiWVYPlVo/lqXE9aMvtHQ+HpIbG6ghmbzWZ/l8v5lq/wCLNy3Dt5aNO3+rX7zVQ0SNv7R8zaisrrtVV2qrVo+KY/8AiYJJNIu5l/1qrt2/7Ndq92cfR/mjwa9vrSkc8nltaPNDNPK0bfvYNn8NVluN3zLI3m7vlkX+Ff7tXH+1Qs8kjBG+6rK33qr3FnCqfarWTalr/D/EzVM4v7J6UJR+0C2+5ZJpGV9rfKrNtZq9lVv+Jm393bXjVmrXDK0MbO0zbn3fLXsj/Lqa/wC0tfmPiHth5f4v0PueDv8Al9H0/U0Pu049KWkbpX5kfbjFb96v+7T5m3Iq/wC3VdG3Sf8AAalkb50/3qALTybUavjfSprzT/A095HJbx/v90e7/lov3a+w5pP3TV8cJ5P/AAhDNb/I7S7ZIlbd/wDs19vwZ8daXl/meLnTvShHzX5jvhtDM3iGDay7GZWZG/8AHWrQ1iC2k8QXdvFazeV58huJf727+H/dpPBGnw2er2u66dUkj8x42+Xb/wACrW1ezulmnjh3QNI7MrKu7bH/ABf99V+gUKUnhPn+h8zja8Vjr+X6nUeEo7fT/CFxDbyM0DM21Wb5VrEe4tVfy5lWWVW2sv8AvVueG9Ptl8B3tnb4igklaT5W3f8AAaxrazkV/m2qv3Wb+838Neq+f2EIxifNwlCWKrSb6/odfcxsvhi1tYdvnszMy/wsv92uP/ib7PG6LJ8qt/FG1dreW8knhyyumVVZWZWVW/hrkgyx3yTW/wDF+7XzPu11YqPuwOLLpe9P1ZvaHNp//CHXv3p4llWNlj/hrlJ4/LZo4/u7V8tm+8tdnp1iq+FZ1m2p5bbvKX5Vk/8Asq5S0hZbnzLePas3yqkq/NXPVg+SMZHRhZx9rUlHv+hqeGI5ptTi3KrTq21pKi8RR3V0JftX7zbJ8zN95v8Aaq74VWGPVoFjbc0L7XT/AGv71J4gs9xZfLXyml/dqrfMzbv4q6ow/wBlZhKrbFo59YWmWLy5t67dvlL91q6/wA1u17dLIu1lg+ZW+9/F8tcrpcLQ3nks0qOzNu3J/wCg12ngPyYdSuF8lU8yP5Y/9quGMZRpynH4rP8AI2zOX7lryMfVFj+1bY1VX3sys33az761kjfzo2gCt96OP/x6tHV47dpZfMklVYWk8v5fvfNWZbeXD8s0Ly7l/dMvzKv+9XbW1k4yMsLL91GUTU8OMzaxasrQKvmbVRvvV0vi23Zp9zfOrMrKq/wt/tVznh6FW1KKaO32xebtRm/vV0nieOFjEtrM8DN/47TpQ9+MvVfl/kedjZf7VA5a63XDSyXC7Tt2x7v4mWqbN8q3E21VVdu9fvbquXVnJHMkasksTNudd3zf71UHhhhuPmV/3zeWsH3v+BU6t+Y9KjyyjoaVnI3nW/k3DqrSLv3fxf7tdf4it42lgZvmVVrmrS1+w/Z7iObyljlXduX7y/7Nb3i5m2BoYZXkkVfu/wAK/wB6q96NWHN5nk4uXNXhy+Zz19DHcQ+XDHEqL+++b7y1WVfJuPJtdz7WXd/ear77ow26TdBIm1pdvzVDb3Edw7TSKqPGv3o/utXRNRk/M6oSlGPkPSS3abcswZpPl3fw/wC7XqFy23UIv92vMbe1W6WK83fu1ZmZdv8AF/er1C9+W7gZq/LvEf8A5hv+3v8A20+94Ja/fR9P1NBWpN3tTR0p524r8tPvSrE3z1KzfOn+y1V4vvsy1J/GtAE1xJ+5dmr5X01bObwhFHIq+VI7Ksm394y19SzN+5avlqzt1j8MWFxZsn75vL/2lb+9X3nBXxVvRfqfPcRO1KHqWPAUMn9pJNeW7PE0bbvMb5lVfurtrZvGaS8nm8uVYt21fm+7TfCFqqzPH5jvcMreV/u/xVcdZJtQZZJmZoV2sn8K1+l4WlbDRj5nw2Mq8+LcvL+v8jesbf7P4aMe5Hb/AFmxF2/+PViTRx2ssd9JC7ose5o923/gVb0Nq1v4alht5tpb5fl+7u/2apXNvJcFlbfcRKq7W/5aLJ/8TXrTpe5GJ4lKp+8nK/U2dS8mPQrWT5ka4Xcq/wCfu1zMdv5juvl+bOzfOm3aqr/s112vs1r4etY5od7/AC/Kq/drmVjk+27luGf/AJaKv8W6lOXtOW5jgZ+7OXmzZtreaTw1dQ3Ef/XJf4lauVa38y4TbvWVYtu5m3bv71djN502lLMsjRSsu2Rv4V/2a5pG86VJJJkXbujXZ97/AIFSrwjoa4Ocuaci/wCFo2j1OzaPa7bPvbf4f9qn6y0bTXDbtr+ZuVt3+dtXvDO1byL+F9v7zb93b/eWotZjs/Ne6mt2VZn+VW+83+9WsIctLlMJ1ebF/wBdzmpI/thgZmdZ42Zlb+KSuw8Ex7bueORfnmg3SN97a1c2qra/LJMv3v3TL95d38NdB4KW3t7y6ht5nd1j3SSfws396uOdNunJdWn+Rvj582HfKU7xbWN1Wbd96Ty938LbvvVmPbrMV2xsssnyy+W/yt/dZf7tX79pGmnZVR/Mk3Msi/MzVD/oeHZm8plX5l/hrslG9uYzoSlGERdEhZr23juGZ0WT5WVtq7q6jxEq+duk27GVfvVz2lWrRywTSXTLKvzKv+zXQ+Jo/OjRpIWlZtvyr91amEXGUX6nLi5c2IgcjfWvkyou751+bcrfdVvu1F9lWzm23jSNKy7V2/xf7W6rot4LeZb6T/W/NHGrf+g0zbJ5Mtu0kqMreYrr93/rnQ4e9zHfCr7vKWLRo2m2sryy27L8rfdSum8QszWcTMrIjL821q5uFfLC2slw7ecvy/3o1/2q6nWIVktUVWXyI0Xc396ip8dPTr+j/wCAeXjZR9rA5m0tfvTTRuysv3N3yqv+7UXnR2tyzLD8jLt2qv8AFVg3UKpK1uzxeX+7jqdbdpNskK7kZNzbf/Qq6XH+U6VP7UtjOsY1a5Sa1umb5mWVW+VV/u/LXqWo/eik/wBqvN4NtvcbmhV4pP4tv3Wr0jUV3In+y1flXiQuVYb/ALe/9tP0Dgl80q3/AG7+pdRtybqc33fvVFD80Yan1+Wn6AY2h6xp+uaWmvaTcJPp11/qpVb5o2/55yL/AAtWmrfvP+A18oeCfGWufC/WmurfddadcfLc2Mn+rlXd/d/vf3Wr6S8H+LtB8aWEureHZpWih/1ttOy+fBu/vKv3l/2qAN2Zv3TV85x6f5mlaa1urIjfvPs23bur6Imbci7f71eNXGnrJaafbw3SpJCvmM2373/xNfo3AND23t/RfqfIcVYn2MaMfNkHhOFre4WG4ZG8tWaNl/i/2anm3XFwzLug3P8AN8vy/wDfVX/D2nrvl8yFfNb5l2/d/wDsalij2vc28kasv8W5vlWv1WhQ5aUYn53XxEZVpSLrrJb6C0jXSmXd8zMu1WWs2ZpoYt0iqySfd2f+hVoNZ7tKWNbpPN37ZF27lVapWFiyxtDJIqsrbv8AZ2/7tdTi/hOGlKMeaUn1Ojvbz/iWwR3ipNBMu1Vb+Jqwrg6ZbTLDBogjaZtvm+Z92tPxRG0elRNHH5/yrt2/Lt/3VrLt7ePzvMj37PL/AHiyNu3L/erKEIfYXX9TLCpcsp+psy291/Yr280aNu+Zmj+6tcy1iqzxR/bv3+1tqsv3q6h2m/shljb91/yzX+JlrnJrNVuVjhh8x1VW3M/zKtaVI/aLwkpcz1LeiwtcalbtIzxbfl2su3c3/wATRqtvDNdM0jLKisyszN8u2p9Chjk1H5pneBflVmo1hrdj9njh2xbvmbb96nH4eUUp/wC0LlMFVjaZV/hX5YE/u1v+B/Lk1K6jjj3botzM3y7qxbm13CKbd8zNti2fLXQ+FmVtRn22+x1Tbu3Vx4ilKVKoo6aP8jpxM4+xZUvPLZHkhkRV835W/wCBVlpa2txL9lkVkXczf7UlXdTtbWa7luI2aKBm+bc21Wb/AHaq23nLFLM0O9pPlibdXS/etzInD+7S5ky7pEkfnW8MMaxM0m3d96t3xF9okRY7eRo/l+VmX/0GsbSvtDapA11CiovzMi/xf7VbXiWOOaxiVWKpvXb833amcpRnDTucWI/3iBzl5a/aoUVlDLD91W+Xc396oWa4jgfzpA7SfcX+JqtXayRq0nmbfL+7u+bdVZoYY086ZW/cyeYu35ttauPvHbCWhceGSS3iupo23qy7Y2+7HXR6z8tjFt27pNq7a5kRySInk3Dssbfv1dv4v4f92up1TyV06KTy93y/Ku7dXPXdp0/X9GcGK92S9TFdbGObybVmd2+Vl/vVEqyRs0ccmyVV20s0asNqts3L+7dV2tUlvZyTbVhX97G3zyO33l/vV2/CX9n3mQFpN6+Xt3/dbdXoOo/8e3/Aq4a0jaYurbVSN2Zn2/6yu31D5rZ9v8NflXiX/wAw3/b3/tp+i8BS/jx/w/qWbb5o0api3zVUs5N1uv8Au1Mzbv8AgVflR+iHzJr+irj95HuX+H5awfDusa14F1xNa0O4ZHX5ZF/hkX+6y/xLXbT+KPDN0m1rqVk/2rZlrn9QbQbjc1vfQbm/h+agD33wx400nxlpSahprbLiPb9rtf4om/vL/stWRq+kxtaSMrQK8LbVWNf9Y1eLeFZr7S/E1hJpOoS2vmXMcMjQS+X8rMqsv+7X158RvAtr4X0+zVrdlvLjcsrN/d+X/wCKr6bhTi7BZBmVPLcTfnxTShby3b8tfxPgeOcLiKlKliqXwwvzfO1jyDSbOSGO4ht/+Pfd+82/e3UkNmt5Jukkii8vcuyT723+9WnbQzaa6rtbbMrM21d3mVE1qzOsjWuxP4lj+Zq/oGCj8J+ZPEc0nIZb/Z7WzWHy/IZm2/L92Rf71U/3PzTKqoyttV2+8y1qXNvN9jRo1Z1+7uZfurVVoY4bmLb8397b8y1cSYVIycpFzXo45o7dY2/0jZ8qN93b/erJTzFdZI4Vf5fmVfvV0Gq+ZbiLyVZXZW+bb/DXPvHIqxSRzHdu+XbWOHtKHNHz/MMNLmgank+Zpr7ZPKb7zN/s/wCzWDLYw/a9yzMs7R/ekb7q10skLNphjuP3rbl3Iv8AdrBlaSTfukWVW2xqrfL5a/71XpK/MXhZy5pcrLujRqt1FGsjbP73+1UOqeZ9qa4kkXb80Lbv7rfw1d0yGa1nit/tHyyf6xm/iWqV55dxctCvywNu/eN95mqupMZc1fmMvzJJm8n5Ylt9yru/u/w1teFZI5NRaOFd7RwbZZayEjWaZYWh8iJW/i/5aba3PDjMupSx7V3Mm7d/s1zVYylSn6M6sS17Jmbqtut4s67WdFf/AIFVWXy7W0a1b5FZV2r/ABLWvdyR+fP+7815JPlVf4az493mXG75G+Vf3n3V/wB2tuXRS6k0Kj9moli0aOO7ikZnV/4ol+9JW5fLC1j5bWqsm35lb7yt/CtYNpN/p8Xl2b7lk+VlX7zV0Wp3EbQf6lmVm2/3fmqZ83NE5MU/3iOTVY7WZY5pp2VfmVf4W/2anjt41H2iORl8xf3ca/dp0zfY2Vmt0/fNtVt33f71Swr5aPC10qo33dy/dX+7WkY+8dsp80eYlW3W4jljt4/303zf7P8AwKt6a126VAvl7pV+7s+6tUHXzkaO1t3lfbt3L91lrqYdJvtYsVj0+HbL5e1o/wCJf9qvnOI84w2UwpVa1Tkhzq7vay11fkefJVK8lGByiW81wrtJcJtj+Vf7rN/dWnJDHJ825Vb+KNPvf71eg+GfgvrWrb/tEd0+799tePav+6tejeGP2f8AT7fbca9NsZfuxRbfl/3m21+d5949cH5G5wVf2sl0gr/167H0mW8H5zmso/VqMuV/a2R87afp95cTMsdncPJG3yP/AAt/vV1V98ttK38KrX0HD4N+H+lh7f8AsuCdY/3ksk+1tv8Ad+7tr511LT9W1a3e3sZJbdW/5axx7mX/ANlr87XilS8Saj9hQdKNHv15v/2T9VyjgzMOE4uWPt+8ta3l/wAOT6XIslmjL8ystWHkjjTczKq/7VclD4g8L+E9Mih17xlZW/lr83mz+ZM3/AY65zVf2hvhzp6sum2+qay6/wASxrBH/wCPbmqz2T5cTXNcjbat422pk8Wa4v3pFb/gNUab8v8AdoA7r4cX2oa94stWuFRorP8A0h//AGX/AMe21+gnxl1RtWmgmksXSKNWjjlkb5f++a+Avgxb6heeJpbPSdPe9vbpI7W2toomkklkkmVVjjVfmZmb5dq19BalD408G3cWl+LPC9/ol5JEs0cGpWM1tK0bMyrIqybW27lZd3+y1eNisoWJzXB5pze9h23bve3VNW2813R52b4GWZ4KeDjPlUvK5vyboZd0a7ty1Ut9y2zqrbZZG+Zf7tZP/CTXu1f3MH/fLf8AxVT2XiK6mu4oZoYtkkm35f8Aar9mpeIns4csqF/+3v8AgHwEfDn/AKf/APkv/BNJ5JFgaOSPe6/u1VflVqox2u6385l8p925/m+7/s7ann8ceC7O4ltbrxdo0U8MjRyRyahCrRsv3lZd3ytUR+IHgVv+Zy0H/wAGMP8A8VWkPEdw+HDf+Tf8AteHvL/zEf8Akv8AwR2seYypCzMy7dyyKv3ap20MylN0ayqrbpFX+H/aq/8A8LA8B5/5HbQf/BlD/wDFUP8AEDwHtb/ittB/8GMP/wAVVw8SHTjyxw3/AJN/9qXDw/UY8v1j/wAl/wCCRS7f7PWFdy+ZJtVt3zbay3jWGVbWSP5F+6q/xVup8QvAaov/ABW2g/8Agxh/+Kp4+IXgHH/I7aD/AODGH/4qqj4lP/oG/wDJv+AOHAKp/wDMR+H/AAShpskc1wizRqrqu3a392ortY5jK1uquscnyr/dWr6/EDwH56t/wm2g7drf8xKH/wCKqf8A4WJ4A/6HbQP/AAZQ/wDxVR/xExKXN9W/8m/+1EvD9c3N9Y/D/gnKtbww7o2Vnfd5iqz7mWtnwysnnNu2MjLuX+8q1p/8LC8Af9Dx4f8A/BnD/wDFVFb+PfAbXbN/wmvh5V2/ebU4F/8AZqzreJSrQcI0LX/v/wDANp8BSqR5fb/h/wAEp3NqvnS+ZGYtz/LIq/drL/1KvDJ88qt95l3L/vV1L/EL4f8A/Q9eHT/3E4f/AIqmf8LE8Af9Dx4f/wDBpD/8VV0/E3lilLD/APk//AIp+Hzj7vt//Jf+Cc9aSNbuixs0rTPt+X70Va+tXHk2G6b7v3dq/N/wKn3fxC8BtCyr448Pt8v/AEEof/iqkt/iF4BWFd3jbw+rbfu/2lD/APFUp+JSnJSWG2/v/wDACfh57SSl7f8A8k/4JzjzNcTLtjVoljXy2Zdrbq6bwT4ft/EGtxaXJGrK23du/wCWbU7/AIWJ4Bb/AJnjw/8A+DOH/wCKrm/G3xa8O+H9HXUPDureHtbuvN2tbf2nHuVdv3tsbfNXNmPiLWxWDq0KFPknKLSle9m1o7WW2+5quALSjer7v+H/AIJ9Y6F8F/DMNlGuoRs7Lt/1e5a2NV1Dwr8PdGe4tdJV1h3bWVV3bv7u5v8Adr80tX/aG+Il9ujt9WtdNi/uafEsf/j33q4XUvFWraxJ5mpalcXTs3zNLKzbq/mHHeH+aZzX9pmmZzqRvflaf/yR+m5HSyfJpRl9TUuXztf8Gfo1rHx+1y4iZdP0+K33R7VVv3m1v71YUPxK17Uri6bUNaa3imTcqp/q1b+7X55tfN/zz20jX0K/vJpFWvdw/AGVYeDp0oJP+a3+Z+r4bxNyzC0/Z0ctjH/t7/7U/ThviNomm6fFN5Ky3EkS+en97avytX56638RPiB4k+XWPFWo3Mbf8sll8uP/AL5WsDw7bax4v1i38M+DfDmp6/rN5u+zafp1nJczzbVaRvLjjVmbaqszbV+6rVp+NvAnxm+H+mRaz44+E3ivwvp0062qXms6Hc2kTzMrMsayTRqu7bGzbf8AZb+7XrZBw7RyCVSVJ35/0v8A5nxnFXEtLiJ05U6Ps+W/W9728la1jK+yzMxkb7zfeZqbKtvb/NcTIn+81czcaxqV1/rLx9v91flWqE3zfM0jM1fRnyBtjrSUo60lAHuv7M0fk6D8VdWh/dXVn4ThWCdflki87VrGCba33l8yGaaFv70c0it8rNXqWgt9o+Cmved8/wBh8UaP9k8z5vI+0WmofaPL/u+Z9mt92373kx7v9Wu3xT4D65qXh3+1L6xtYru3uvLtb6znRpLa9t2+ZoZlVlbbuVWVlZWjZY5I2WSNWX1nV/FV5rllFpOk+E7Dw5pKyrcPp+lLctDPcKrKs0jXE00kjKrMqq0m2PdJtVWkkaQAolqtaazfb7f/AK6r/wChVXltbxX/AOPOf/vhquaZa3jXsDNayhVdWZmXb/FQBj/Fr4ufFbwHo/gPR/AvxO8V+HLCbR9YupLXSNaubSKSZvE+sq0jRwyKrNtVV3f7K1zWg/tEftATK3nfHT4gv9373ia9b/2pXuGlal4k0O1/s/QfH3jXSLLzZpls9O8WanaQRyTSNJIywwzrGu6SRmbav3marn/CU+PP+isfEj/wuNW/+Sa+iwWd0cNSUJUea39djlxGHlWjyxlynm9h8efjjJu3fGXx03+94ju//jldJpvxt+M8jfvPi741b5f4tfu//jldSvibx5/0Vj4kf+Fxq/8A8k0N4m8eY/5Kx8SP/C41b/5Jr2cPxfhaXxYSMvn/APangYjh6tW+HESj8v8AgkNh8Y/i65Xd8U/GDf72uXP/AMcrbtPi38VSq5+Jvis/9xq5/wDjlZaeJPHOPm+LHxH/APC41b/5Jpw8SeOv+irfEf8A8LjVv/kmtcVxnha8OSOCjH5r/wCRPIq8F4mpL/e5fc//AJI6zTPip8UJJlWT4keKGXd/FrNx/wDHK7/QviF4+mdfO8ceIH+X+LU5m/8AZq8TXxN48aXb/wALY+JG3b/0PGr/APyTUy+IvHGf+SrfEn/wuNY/+Sa/HuJskq5/Pmo1vZen/Do9fK+HquA+LEOfy/4J9Q6R4w8XSbPM8Uau3y/xX0n/AMVXSJ4k8RbV/wCKg1L7v/P1J/8AFV8dN4g8cf8ARVviP/4XGsf/ACTWW/ij4kNqrwr8XPiQsHlblX/hNtW+Vv8Av/X53V8LcfUlzf2lL7n/APJn22DxccL8UOY+1rjxN4kUNt8Qakv/AG9Sf/FVz2qeL/FaB/L8T6uPvfdvpP8A4qvlaDxB8Ql+Wb4ufEl/97xxq/8A8k1aXxB44/6Kt8SP/C61j/5Jrow/hnj8PLmlmMpfJ/8AyR9FhOJsPhviw8ZfP/gHrXiv4g+PYDL5HjjxBH/ualOv8P8AvV5tqvxU+J0dwyx/EfxQq/7Or3P/AMXWVLr/AI5Csw+KvxHH/c8at/8AJNJba/41kjVpPin8Rm3f9Tvq3/yTX2uW8P1sBHlliJS+X/BPq8H4lYDCLlllsZfNf/Im1ofxS+J8t3tl+Ivid199XuW/9qV6r4U8feOp/K8/xprsu5f49Rlb/wBmrxUa74yDcfFH4jbf+x31j/5JrL8S+K/iFY6W9xZfFr4kRurL83/Cbas38X+1c17U8HKX2zPH+IuBxnwZdGPzX/yJ9ueDfEfiG5C/add1CX/fupG/9mriP26bi6uv2PfH63FxLL+70n77s3/MXsq+EtT+K3xmhH+j/Gz4kr/3OOpt/wC164Xxd8Svi54o0q48P+Jvix431nSbho2nsdS8R3tzbS+XIsi7o5JGVtrKrfMv3lWpoYGVKfNz8x8LmObU8fJ8tLl/r0PIJY/mb/erG1Jds1dRdWrK7fK33q57W4/LkTd8tegeGZZ+9XpPxRLeBfDWh/Be3/dXtjt1zxZt+Vm1ieP93aSfdb/QrZo4WhmXzILybU13bZK4nw1ryeGfFOleJDpOl6t/ZN9b339n6nB59ld+TIsnk3Ee5fMibbtZf4lZqp6pq1/rup3mt6zqdxf6hqE8l1dXV1O0s080jM0kkkjfMzMzMzM33magCsu7+KnNG2xv92mhl/vLU/ysn3qAP//Z";
+let chImg = null, chType = "pose";
+function chCharge(){
+  let src = CH_DEFAUT; try{ src = localStorage.getItem("dpe_ch_photo") || CH_DEFAUT; }catch(e){}
+  $("chPrev").src = src;
+  const i = new Image(); i.onload = () => { chImg = i; if (!$("cv2").classList.contains("hide")) imageChantier(); }; i.src = src;
+}
+$("chPhotoSet").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const i = new Image(), u = URL.createObjectURL(f);
+  i.onload = () => {
+    const r = Math.min(1, 1600 / Math.max(i.width, i.height)), c = document.createElement("canvas");
+    c.width = i.width*r; c.height = i.height*r; c.getContext("2d").drawImage(i,0,0,c.width,c.height);
+    let d = c.toDataURL("image/jpeg", .8);
+    try{ localStorage.setItem("dpe_ch_photo", d); }
+    catch(_){ d = (()=>{ c.width/=2; c.height/=2; c.getContext("2d").drawImage(i,0,0,c.width,c.height); return c.toDataURL("image/jpeg",.75); })(); try{ localStorage.setItem("dpe_ch_photo", d); }catch(__){ toast("Photo trop lourde"); return; } }
+    chCharge(); toast("Photo du chantier enregistrée ✅");
+  };
+  i.src = u; e.target.value = "";
+});
+function chReset(){ try{ localStorage.removeItem("dpe_ch_photo"); }catch(e){} chCharge(); toast("Photo d'origine remise"); }
+chCharge();
+function chSet(b){ document.querySelectorAll("#chType button").forEach(x => x.classList.toggle("on", x === b)); chType = b.dataset.v; majChantier(); }
+function chCommune(){ return $("chCom").value.trim(); }
+function lienSimu(c){ const b = $("lien").value.trim().split("?")[0]; return b ? b + "?" + slug(c) : ""; }
+function majChantier(){
+  const c = chCommune(); if (!c){ $("post2").value = ""; majGroupes(); return; }
+  const asp = $("chAspect").value.trim(), fin = $("chFin").value.trim();
+  const wa = `https://wa.me/33645624285?text=${encodeURIComponent("Bonjour, je souhaite l'adresse du chantier de " + c)}`;
+  const simu = lienSimu(c);
+  $("post2").value =
+`📍 ${gras("PROPRIÉTAIRES DE MAISON À " + c.toUpperCase())}
+🚧 ${gras("CHANTIER EN COURS À " + c.toUpperCase())} : isolation des murs PAR L'EXTÉRIEUR
+
+En ce moment, ${chType === "kit" ? "un propriétaire pose lui-même son KIT Uniso" : "nos équipes isolent une maison"} à ${c}${asp ? `, finition ${asp}` : ""}.
+
+👀 ${gras("Envie de voir le résultat en vrai ?")} Venez voir le chantier${fin ? ` jusqu'au ${fin}` : ""} : l'aspect, la pose, les finitions… rien ne vaut une vraie maison !
+
+📲 ${gras("Demandez-moi l'adresse du chantier :")}
+💬 WhatsApp : ${wa}
+✉️ s.renaud@ouest-eco-logis.fr
+📞 06 45 62 42 85
+
+${KIT}${simu ? `\n\n👉 ${gras("Votre simulation gratuite")} (2 min) :\n${simu}` : ""}
+
+${tag(c)} #ChantierEnCours #IsolationExterieure`;
+  majGroupes();
+}
+function bandeChantier(x, y, h, W){
+  x.save(); x.beginPath(); x.rect(0, y, W, h); x.clip();
+  x.fillStyle = "#ffc400"; x.fillRect(0, y, W, h);
+  x.fillStyle = "#1d2622";
+  for (let i = -h; i < W + h; i += 70){ x.beginPath(); x.moveTo(i, y + h); x.lineTo(i + 35, y + h); x.lineTo(i + 35 + h, y); x.lineTo(i + h, y); x.fill(); }
+  x.restore();
+}
+async function imageChantier(){
+  const c = chCommune(); if (!c){ toast("Indiquez la commune"); return; }
+  majChantier();
+  const cv = $("cv2"), x = cv.getContext("2d"), W = 1080;
+  x.textAlign = "center";
+  // photo plein cadre
+  if (chImg){ const k = Math.max(W/chImg.width, W/chImg.height), w = chImg.width*k, h = chImg.height*k; x.drawImage(chImg, (W-w)/2, (W-h)/2, w, h); }
+  else { x.fillStyle = "#5f6b66"; x.fillRect(0,0,W,W); x.fillStyle = "#fff"; x.font = "600 40px system-ui,sans-serif"; x.fillText("(ajoutez une photo du chantier)", W/2, W/2); }
+  // logo
+  x.fillStyle = "#fff"; x.fillRect(0,0,W,140);
+  const logo = LOGO ? await loadImg(LOGO) : null;
+  if (logo){ const k = Math.min(600/logo.width, 110/logo.height), w = logo.width*k, h = logo.height*k; x.drawImage(logo,(W-w)/2,(140-h)/2,w,h); }
+  else { x.fillStyle = "#1f5a37"; x.font = "800 60px system-ui,sans-serif"; x.fillText("Ouest Eco Logis", W/2, 95); }
+  // bandeau chantier
+  bandeChantier(x, 140, 26, W);
+  x.fillStyle = "#ffc400"; x.fillRect(0, 166, W, 120);
+  x.fillStyle = "#1d2622"; fit(x, "🚧 CHANTIER EN COURS 🚧", 1000, 82, 900); x.fillText("🚧 CHANTIER EN COURS 🚧", W/2, 255);
+  bandeChantier(x, 286, 26, W);
+  // commune
+  x.font = "900 74px system-ui,sans-serif"; fit(x, "À " + c.toUpperCase(), 1000, 74, 900);
+  x.lineWidth = 10; x.strokeStyle = "rgba(0,0,0,.65)"; x.lineJoin = "round";
+  x.strokeText("À " + c.toUpperCase(), W/2, 395); x.fillStyle = "#fff"; x.fillText("À " + c.toUpperCase(), W/2, 395);
+  // bas
+  const g = x.createLinearGradient(0, 700, 0, W); g.addColorStop(0, "rgba(31,90,55,0)"); g.addColorStop(.25, "rgba(31,90,55,.92)"); g.addColorStop(1, "rgba(31,90,55,1)");
+  x.fillStyle = g; x.fillRect(0, 700, W, 380);
+  x.fillStyle = "#ffd54f"; fit(x, "ISOLATION PAR L'EXTÉRIEUR" + (chType === "kit" ? " · KIT" : ""), 1000, 56, 900);
+  x.fillText("ISOLATION PAR L'EXTÉRIEUR" + (chType === "kit" ? " · KIT" : ""), W/2, 840);
+  x.fillStyle = "#fff"; fit(x, "👀 Venez voir le chantier !", 1000, 52, 800); x.fillText("👀 Venez voir le chantier !", W/2, 920);
+  fit(x, "📲 Adresse sur demande : 06 45 62 42 85", 1000, 44, 700); x.fillText("📲 Adresse sur demande : 06 45 62 42 85", W/2, 995);
+  x.font = "400 26px system-ui,sans-serif"; x.globalAlpha = .85; x.fillText("WhatsApp · SMS · appel · s.renaud@ouest-eco-logis.fr", W/2, 1045); x.globalAlpha = 1;
+  cv.classList.remove("hide");
+}
+const blobCh = () => new Promise(r => $("cv2").toBlob(r, "image/jpeg", .9));
+async function telechargerCh(){
+  if ($("cv2").classList.contains("hide")) await imageChantier();
+  const b = await blobCh(), a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = `chantier-${slug(chCommune() || "uniso")}.jpg`; a.click(); toast("Image enregistrée");
+}
+async function publierChantier(){
+  const c = chCommune(); if (!c){ toast("Indiquez la commune"); return; }
+  majChantier();
+  await publierVers($("grpSel2").value, $("post2").value, async () => { await imageChantier(); },
+    blobCh, `chantier-${slug(c)}.jpg`, "Chantier en cours", c);
+}
+loadSettings();
+majGroupes();
+</script>
+</body>
+</html>
