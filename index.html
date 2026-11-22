@@ -414,13 +414,15 @@ function gras(t){
 }
 const tag = n => "#" + n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^A-Za-z0-9]+/).filter(Boolean).map(m => m.charAt(0).toUpperCase() + m.slice(1)).join("");
 const ENTETE = c => `📍 ${gras("PROPRIÉTAIRES DE MAISON À " + c.nom.toUpperCase())}\n🏠 ${gras("Isolation de vos murs PAR L'EXTÉRIEUR")}`;
-const LIEN = () => `👉 ${gras("Votre simulation gratuite")} (2 min) :\n${lienCommune()}`;
+const LIEN = () => `👉 ${gras("Être rappelé gratuitement")} (30 secondes, sans mesures) :\n${lienCommune()}`;
+const APPEL = `💬 ${gras("Commentez MAISON")} ou écrivez-moi en privé, je vous réponds personnellement.`;
 const KIT = "🔨 Bricoleur ? Recevez le KIT Uniso et posez-le vous-même.\n👷 Ou confiez la pose clé en main à nos équipes.";
 const TPLS = [
-  { nom: "Chiffre choc", f: c => `${ENTETE(c)}\n\n⚠️ ${gras(c.pDG + " %")} des maisons de ${c.nom} diagnostiquées depuis 2021 sont classées entre D et G, dont ${c.pFG} % en F ou G (passoires thermiques).\n\nMurs froids, chauffage qui coûte cher, DPE qui bloque une vente ou une location ? En isolant les murs par l'extérieur, vous gagnez des classes DPE sans travaux à l'intérieur, et votre façade est rénovée en même temps.\n\n${KIT}\n\n${LIEN()}\nVous m'envoyez 2 ou 3 photos et un croquis avec vos mesures, je vous réponds avec un devis estimatif. Sans déplacement, sans engagement.\n\n${tag(c.nom)} #IsolationExterieure #ITE #DPE` },
-  { nom: "Kit bricoleur", f: c => `${ENTETE(c)}\n\n🔨 ${gras("Bricoleur ? Posez-la vous-même !")}\nAvec le KIT Uniso, vous recevez tout le nécessaire pour isoler les murs de votre maison par l'extérieur. Vous préférez ne pas y toucher ? Nos équipes s'en chargent, clé en main.\n\n⚠️ À ${c.nom}, ${gras(c.pDG + " %")} des maisons diagnostiquées depuis 2021 sont classées entre D et G.\n\n${LIEN()}\nPrécisez simplement « kit » ou « pose » : 2 ou 3 photos et un croquis avec vos mesures suffisent.\n\n${tag(c.nom)} #IsolationExterieure #Bricolage #DPE` },
-  { nom: "Voisin", f: c => `${ENTETE(c)}\n\nBonjour à tous 👋 Je travaille régulièrement à ${c.nom} et alentours pour l'isolation des maisons par l'extérieur (Uniso).\n\n⚠️ D'après les DPE publics, ${gras(c.pDG + " %")} des maisons diagnostiquées ici depuis 2021 sont classées entre D et G.\n\n${KIT}\n\n${LIEN()}\nVous m'envoyez quelques photos et un croquis avec vos mesures, je vous réponds avec un devis estimatif, sans me déplacer.\n\nAvec plaisir pour répondre à vos questions en commentaire !\n\n${tag(c.nom)} #IsolationExterieure` },
-  { nom: "Vente / location", f: c => `${ENTETE(c)}\n\n🔑 ${gras("Votre DPE bloque une vente ou une location ?")}\n⚠️ À ${c.nom}, ${gras(c.pDG + " %")} des maisons diagnostiquées depuis 2021 sont classées entre D et G, dont ${c.pFG} % en F ou G. Les logements G ne peuvent déjà plus être mis en location, les F suivront en 2028.\n\nL'isolation des murs par l'extérieur est l'un des travaux qui font le plus gagner de classes DPE.\n\n${KIT}\n\n${LIEN()}\n\n${tag(c.nom)} #IsolationExterieure #DPE` }
+  { nom: "Votre maison ?", f: c => `${ENTETE(c)}\n\n⚠️ ${gras(c.pDG + " %")} des maisons de ${c.nom} sont classées de D à G au DPE (source ADEME).\n\n${gras("Votre maison est-elle concernée ?")} Je vous le dis gratuitement : envoyez-moi juste votre rue en message privé, je regarde sa classe énergie et je vous explique ce qu'on peut faire.\n\n${KIT}\n\n${APPEL}\n\n${tag(c.nom)} #IsolationExterieure #DPE` },
+  { nom: "Chiffre choc", f: c => `${ENTETE(c)}\n\n⚠️ ${gras(c.pDG + " %")} des maisons de ${c.nom} diagnostiquées depuis 2021 sont classées entre D et G, dont ${c.pFG} % en F ou G (passoires thermiques).\n\nMurs froids, chauffage qui coûte cher, DPE qui bloque une vente ou une location ? En isolant les murs par l'extérieur, vous gagnez des classes DPE sans travaux à l'intérieur, et votre façade est rénovée en même temps.\n\n${KIT}\n\n${APPEL}\n\n${LIEN()}\nPas besoin de mesures pour commencer. Sans engagement.\n\n${tag(c.nom)} #IsolationExterieure #ITE #DPE` },
+  { nom: "Kit bricoleur", f: c => `${ENTETE(c)}\n\n🔨 ${gras("Bricoleur ? Posez-la vous-même !")}\nAvec le KIT Uniso, vous recevez tout le nécessaire pour isoler les murs de votre maison par l'extérieur. Vous préférez ne pas y toucher ? Nos équipes s'en chargent, clé en main.\n\n⚠️ À ${c.nom}, ${gras(c.pDG + " %")} des maisons diagnostiquées depuis 2021 sont classées entre D et G.\n\n${APPEL}\n\n${LIEN()}\n\n${tag(c.nom)} #IsolationExterieure #Bricolage #DPE` },
+  { nom: "Voisin", f: c => `${ENTETE(c)}\n\nBonjour à tous 👋 Je travaille régulièrement à ${c.nom} et alentours pour l'isolation des maisons par l'extérieur (Uniso).\n\n⚠️ D'après les DPE publics, ${gras(c.pDG + " %")} des maisons diagnostiquées ici depuis 2021 sont classées entre D et G.\n\n${KIT}\n\n${APPEL}\n\n${LIEN()}\n\nAvec plaisir pour répondre à vos questions en commentaire !\n\n${tag(c.nom)} #IsolationExterieure` },
+  { nom: "Vente / location", f: c => `${ENTETE(c)}\n\n🔑 ${gras("Votre DPE bloque une vente ou une location ?")}\n⚠️ À ${c.nom}, ${gras(c.pDG + " %")} des maisons diagnostiquées depuis 2021 sont classées entre D et G, dont ${c.pFG} % en F ou G. Les logements G ne peuvent déjà plus être mis en location, les F suivront en 2028.\n\nL'isolation des murs par l'extérieur est l'un des travaux qui font le plus gagner de classes DPE.\n\n${KIT}\n\n${APPEL}\n\n${LIEN()}\n\n${tag(c.nom)} #IsolationExterieure #DPE` }
 ];
 function renderTpls(){
   $("tpls").innerHTML = TPLS.map((t,i) => `<button class="${i===tpl?'on':''}" onclick="tpl=${i};renderTpls();majPost()">${t.nom}</button>`).join("");
@@ -554,10 +556,9 @@ async function image(sansAnim = false){
   const top = by + bh + 34, qrS = Math.max(140, Math.min(200, W - top - 34));
   const qr = await loadImg(QR_PAGE);
   const zoneW = qr ? W - qrS - 150 : 960, cx = qr ? 60 + zoneW/2 : W/2;
-  x.fillStyle = "#fff"; fit2(x, "ESTIMATION GRATUITE EN 2 MIN", zoneW, 42, 800); x.fillText("ESTIMATION GRATUITE EN 2 MIN", cx, top + 42);
-  if (lien){ const court = lien.replace(/^https?:\/\//,"").replace(/\/$/,"");
-    x.fillStyle = "#c9d6f2"; fit2(x, "Votre simulation : " + court, zoneW, 28, 600); x.fillText("Votre simulation : " + court, cx, top + 92); }
-  x.fillStyle = "#fff"; fit2(x, "06 45 62 42 85", zoneW, 54, 900); x.fillText("06 45 62 42 85", cx, top + (lien ? 160 : 120));
+  x.fillStyle = "#fff"; fit2(x, "VOTRE MAISON EST CONCERNÉE ?", zoneW, 42, 800); x.fillText("VOTRE MAISON EST CONCERNÉE ?", cx, top + 42);
+  x.fillStyle = "#c9d6f2"; fit2(x, "Commentez « MAISON » ou appelez-moi", zoneW, 30, 600); x.fillText("Commentez « MAISON » ou appelez-moi", cx, top + 92);
+  x.fillStyle = "#fff"; fit2(x, "06 45 62 42 85", zoneW, 54, 900); x.fillText("06 45 62 42 85", cx, top + 160);
   if (qr){ const qx = W - qrS - 60, qy = top;
     x.fillStyle = "#fff"; x.beginPath(); x.roundRect(qx - 12, qy - 12, qrS + 24, qrS + 24, 14); x.fill(); x.drawImage(qr, qx, qy, qrS, qrS); }
   cv.classList.remove("hide"); $("imgAct").classList.remove("hide");
@@ -713,7 +714,7 @@ En ce moment, ${chType === "kit" ? "un propriétaire pose lui-même son KIT Unis
 ✉️ s.renaud@ouest-eco-logis.fr
 📞 06 45 62 42 85
 
-${KIT}${simu ? `\n\n👉 ${gras("Votre simulation gratuite")} (2 min) :\n${simu}` : ""}
+${KIT}${simu ? `\n\n👉 ${gras("Être rappelé gratuitement")} (30 secondes) :\n${simu}` : ""}
 
 ${tag(c)} #ChantierEnCours #IsolationExterieure`;
   majGroupes();
@@ -873,10 +874,8 @@ async function video(){
     // la commune : légère respiration
     const kc = 1 + 0.035 * (0.5 - 0.5 * Math.cos(2 * Math.PI * t / 2.4));
     dessineCommune(x, kc);
-    // le pourcentage : affiché dès la 1re image, puis respire doucement (en décalé avec la commune)
-    // le pourcentage : part de 0 et monte vite jusqu'au chiffre (1,4 s), petit rebond, puis respire doucement
-    // compteur : 0, 1, 2, 3… jusqu'au chiffre en 5,5 s, puis petit rebond et respiration
-    const MONTEE = 5.5, val = Math.floor(cur.pDG * Math.min(1, t / MONTEE));
+    // compteur : 0 → chiffre en 1,8 s, rapide au début puis ralentit à la fin, petit rebond, puis respiration
+    const MONTEE = 1.8, u = Math.min(1, t / MONTEE), val = Math.floor(cur.pDG * (1 - Math.pow(1 - u, 3)) + (u >= 1 ? 0.5 : 0));
     const pop = t >= MONTEE && t < MONTEE + 0.45 ? 1 + 0.10 * Math.sin(Math.PI * (t - MONTEE) / 0.45) : 1;
     const kp = t < MONTEE + 0.45 ? pop : 1 + 0.045 * (0.5 - 0.5 * Math.cos(2 * Math.PI * (t - MONTEE - 0.45) / 2.4));
     dessinePct(x, val, kp);
